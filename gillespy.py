@@ -38,7 +38,7 @@ try:
 except:
     pass
 
-
+import pdb
 
 class Model(object):
     """
@@ -1066,7 +1066,7 @@ if __name__ == '__main__':
     
     reactions = [rxn1,rxn2,rxn3,rxn4,rxn5]
     tyson_model.addReaction(reactions)
-    
+    pdb.set_trace() 
     # returns trajectories from the tyson model
     tyson_trajectories = simulate(tyson_model)
     
