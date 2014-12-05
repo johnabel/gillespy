@@ -62,7 +62,8 @@ class Model(object):
         self.listOfSpecies    = OrderedDict()
         self.listOfReactions  = OrderedDict()
         
-        # A well mixed model has an optional volume parameter. This should be a Parameter
+        # A well mixed model has an optional volume parameter. 
+        # This should be a Parameter
         self.volume = volume;
 
         # This defines the unit system at work for all numbers in the model
@@ -116,20 +117,21 @@ class Model(object):
         self.addSpecies(species)
     
 
-    def updateNamespace(self):
+    def update_namespace(self):
         """ Create a dict with flattened parameter and species objects. """
         for param in self.listOfParameters:
             self.namespace[param]=self.listOfParameters[param].value
-        # Dictionary of expressions that can be evaluated in the scope of this model.
+        # Dictionary of expressions that can be evaluated in the scope of this
+        # model.
         self.expressions = {}
 
-    def getSpecies(self, sname):
+    def get_species(self, sname):
         return self.listOfSpecies[sname]
     
-    def getAllSpecies(self):
+    def get_all_species(self):
         return self.listOfSpecies
 
-    def addSpecies(self, obj):
+    def add_species(self, obj):
         """ 
             Add a species to listOfSpecies. Accepts input either as a single 
             Species object, or as a list of Species objects.
@@ -137,35 +139,38 @@ class Model(object):
                 
         if isinstance(obj, Species):
             if obj.name in self.listOfSpecies:
-                raise ModelError("Can't add species. A species with that name alredy exisits.")
+                raise ModelError("Can't add species. A species with that \
+                                    name alredy exisits.")
             self.listOfSpecies[obj.name] = obj;
         else: # obj is a list of species
             for S in obj:
                 if S.name in self.listOfSpecies:
-                    raise ModelError("Can't add species. A species with that name alredy exisits.")
+                    raise ModelError("Can't add species. A species with that \
+                                        name alredy exisits.")
                 self.listOfSpecies[S.name] = S;
     
-    def deleteSpecies(self, obj):
+    def delete_species(self, obj):
         self.listOfSpecies.pop(obj)        
          
-    def deleteAllSpecies(self):
+    def delete_all_species(self):
         self.listOfSpecies.clear()
 
-    def setUnits(self, units):
+    def set_units(self, units):
         if units.lower() == 'concentration' or units.lower() == 'population':
             self.units = units.lower()
         else:
-            raise Exception("units must be either concentration or population (case insensitive)")
+            raise Exception("units must be either concentration or \
+                                population (case insensitive)")
 
-    def getParameter(self,pname):
+    def get_parameter(self,pname):
         try:
             return self.listOfParameters[pname]
         except:
             raise ModelError("No parameter named "+pname)
-    def getAllParameters(self):
+    def get_all_parameters(self):
         return self.listOfParameters
     
-    def addParameter(self,params):
+    def add_parameter(self,params):
         """ 
             Add Paramter(s) to listOfParamters. Input can be either a
             single paramter object or a list of Parameters.
@@ -180,29 +185,30 @@ class Model(object):
             else:
                 raise
 
-    def deleteParameter(self, obj):
+    def delete_parameter(self, obj):
         self.listOfParameters.pop(obj)
 
-    def setParameter(self,pname,expression):
+    def set_parameter(self,pname,expression):
         """ Set the expression of an existing paramter. """
         p = self.listOfParameters[pname]
         p.expression = expression
         p.evaluate()
         
-    def resolveParameters(self):
+    def resolve_parameters(self):
         """ Attempt to resolve all parameter expressions to scalar floats. 
         This methods must be called before exporting the model. """
-        self.updateNamespace()
+        self.update_namespace()
         for param in self.listOfParameters:
             try:
                 self.listOfParameters[param].evaluate(self.namespace)
             except:
-                raise ParameterError("Could not resolve Parameter expression "+ param + "to a scalar value.")
+                raise ParameterError("Could not resolve Parameter expression "
+                                        + param + "to a scalar value.")
     
-    def deleteAllParameters(self):
+    def delete_all_parameters(self):
         self.listOfParameters.clear()
 
-    def addReaction(self,reacs):
+    def add_reaction(self,reacs):
         """ Add reactions to model. Input can be single instance, a list
         of instances or a dict with name,instance pairs. """
         
@@ -218,16 +224,16 @@ class Model(object):
         else:
             raise
 
-    def getReaction(self, rname):
+    def get_reaction(self, rname):
         return self.listOfReactions[rname]
 
-    def getAllReactions(self):
+    def get_all_reactions(self):
         return self.listOfReactions
     
-    def deleteReaction(self, obj):
+    def delete_reaction(self, obj):
         self.listOfReactions.pop(obj)
         
-    def deleteAllReactions(self):
+    def delete_all_reactions(self):
         self.listOfReactions.clear()
 
     
@@ -239,7 +245,8 @@ class Species():
         # A species has a name (string) and an initial value (positive integer)
         self.name = name
         self.initial_value = initial_value
-        assert self.initial_value >= 0, "A species initial value has to be a positive number."
+        assert self.initial_value >= 0, "A species initial value has to \
+                                        be a positive number."
 
 
 class Parameter():
@@ -277,11 +284,12 @@ class Parameter():
         except:
             self.value = None
             
-    def setExpression(self,expression):
+    def set_expression(self,expression):
         self.expression = expression
-        # We allow expression to be passed in as a non-string type. Invalid strings
-        # will be caught below. It is perfectly fine to give a scalar value as the expression.
-        # This can then be evaluated in an empty namespace to the scalar value.
+        # We allow expression to be passed in as a non-string type. Invalid
+        # strings will be caught below. It is perfectly fine to give a scalar 
+        # value as the expression. This can then be evaluated in an empty 
+        # namespace to the scalar value.
         if expression != None:
             self.expression = str(expression)
                     
@@ -292,31 +300,31 @@ class Parameter():
 
 class Reaction():
     """ 
-        Models a single reaction. A reaction has its own dictinaries of species 
-        (reactants and products) and parameters. The reaction's propensity 
-        function needs to be evaluable (and result in a non-negative scalar 
-        value) in the namespace defined by the union of those dicts.
+    Models a single reaction. A reaction has its own dictinaries of species 
+    (reactants and products) and parameters. The reaction's propensity 
+    function needs to be evaluable (and result in a non-negative scalar 
+    value) in the namespace defined by the union of those dicts.
     """
 
     def __init__(self, name = "", reactants = {}, products = {}, 
                  propensity_function = None, massaction = False, 
                  rate=None, annotation=None):
         """ 
-            Initializes the reaction using short-hand notation. 
-            
-            Input: name: string that the model is referenced by 
-            parameters: a list of parameter instances 
-            propensity_function: string with the expression for the reaction's 
-                                    propensity
-            reactants: List of (species,stoiciometry)
-            tuples product: List of (species,stoiciometry) 
-            tuples annotation: Description of the reaction (meta)
-            
-                massaction True,{False}     is the reaction of mass action type
-                or not?  rate                        if mass action, rate is a
-                paramter instance.
-            
-            Raises: ReactionError
+        Initializes the reaction using short-hand notation. 
+        
+        Input: name: string that the model is referenced by 
+        parameters: a list of parameter instances 
+        propensity_function: string with the expression for the reaction's 
+                                propensity
+        reactants: List of (species,stoiciometry)
+        tuples product: List of (species,stoiciometry) 
+        tuples annotation: Description of the reaction (meta)
+        
+            massaction True,{False}     is the reaction of mass action type
+            or not?  rate                        if mass action, rate is a
+            paramter instance.
+        
+        Raises: ReactionError
             
         """
             
@@ -357,13 +365,14 @@ class Reaction():
         if self.massaction:
             self.type = "mass-action"
             if rate == None:
-                raise ReactionError("Reaction : A mass-action propensity has to have a rate.")
+                raise ReactionError("Reaction : A mass-action propensity has\
+                 to have a rate.")
             self.marate = rate
-            self.createMassAction()
+            self.create_mass_action()
         else:
             self.type = "customized"
                 
-    def createMassAction(self):
+    def create_mass_action(self):
         """ 
             Create a mass action propensity function given
             self.reactants and a single parameter value.
@@ -376,7 +385,8 @@ class Reaction():
         for r in self.reactants:
             total_stoch+=self.reactants[r]
         if total_stoch>2:
-            raise ReactionError("Reaction: A mass-action reaction cannot involve more than two of one species or one of two species.")
+            raise ReactionError("Reaction: A mass-action reaction cannot \
+            involve more than two of one species or one of two species.")
         # Case EmptySet -> Y
         propensity_function = self.marate.name;
              
@@ -384,7 +394,8 @@ class Reaction():
         for r in self.reactants:
             # Case 1: 2X -> Y
             if self.reactants[r] == 2:
-                propensity_function = "0.5*" +propensity_function+ "*"+r+"*("+r+"-1)"
+                propensity_function = ("0.5*" +propensity_function+ 
+                                            "*"+r+"*("+r+"-1)")
             else:
             # Case 3: X1, X2 -> Y;
                 propensity_function += "*"+r
@@ -400,7 +411,8 @@ class Reaction():
     
     def addReactant(self,S,stoichiometry):
         if stoichiometry <= 0:
-            raise ReactionError("Reaction Stoichiometry must be a positive integer.")
+            raise ReactionError("Reaction Stoichiometry must be a \
+                                    positive integer.")
         self.reactants[S.name]=stoichiometry
 
     def addProduct(self,S,stoichiometry):
@@ -425,17 +437,6 @@ class ParameterError(ModelError):
     pass
 class SimuliationError(Exception):
     pass
-
-
-
-
-
-#class gillespy_model(Model):
-#    """ gillespy_model extends a well mixed model with StochKit specific serialization. """
-#    def __init__(self, *args, **kwargs):
-#        super(gillespy_model, self).__init__(*args, **kwargs)
-#
-#        self.units = "population"
 
 
 class StochMLDocument():
@@ -490,31 +491,33 @@ class StochMLDocument():
         # Species
         spec = etree.Element('SpeciesList')
         for sname in model.listOfSpecies:
-            spec.append(md.SpeciestoElement(model.listOfSpecies[sname]))
+            spec.append(md.species_to_element(model.listOfSpecies[sname]))
         md.document.append(spec)
                 
         # Parameters
         params = etree.Element('ParametersList')
         for pname in model.listOfParameters:
-            params.append(md.ParametertoElement(model.listOfParameters[pname]))
+            params.append(md.parameter_to_element(
+                                        model.listOfParameters[pname]))
 
         #if model.volume != None and model.units == "population":
-        #    params.append(md.ParametertoElement(model.volume))
+        #    params.append(md.species_to_element(model.volume))
 
         md.document.append(params)
         
         # Reactions
         reacs = etree.Element('ReactionsList')
         for rname in model.listOfReactions:
-            reacs.append(md.ReactionToElement(model.listOfReactions[rname]))
+            reacs.append(md.reaction_to_element(model.listOfReactions[rname]))
         md.document.append(reacs)
         
         return md
     
     
     @classmethod
-    def fromFile(cls,filepath):
-        """ Intializes the document from an exisiting native StochKit XML file read from disk. """
+    def from_file(cls,filepath):
+        """ Intializes the document from an exisiting native StochKit XML 
+        file read from disk. """
         tree = etree.parse(filepath)
         root = tree.getroot()
         md = cls()
@@ -522,9 +525,10 @@ class StochMLDocument():
         return md
 
     @classmethod
-    def fromString(cls,string):
-        """ Intializes the document from an exisiting native StochKit XML file read from disk. """
-        root = etree.fromstring(string)
+    def from_string(cls,string):
+        """ Intializes the document from an exisiting native StochKit XML 
+        file read from disk. """
+        root = etree.fromString(string)
         
         md = cls()
         md.document = root
@@ -583,22 +587,23 @@ class StochMLDocument():
                 model.volume = Parameter(name, expression = expr)
             else:
                 p = Parameter(name,expression=expr)
-                # Try to evaluate the expression in the empty namespace (if the expr is a scalar value)
+                # Try to evaluate the expression in the empty namespace 
+                # (if the expr is a scalar value)
                 p.evaluate()
-                model.addParameter(p)
+                model.add_parameter(p)
         
         # Create species
         for spec in root.iter('Species'):
             name = spec.find('Id').text
             val  = spec.find('InitialPopulation').text
             s = Species(name,initial_value = float(val))
-            model.addSpecies([s])
+            model.add_species([s])
         
-        # The namespace_propensity for evaluating the propensity function for reactions must
-        # contain all the species and parameters.
+        # The namespace_propensity for evaluating the propensity function 
+        # for reactions must contain all the species and parameters.
         namespace_propensity = OrderedDict()
-        all_species = model.getAllSpecies()
-        all_parameters = model.getAllParameters()
+        all_species = model.get_all_species()
+        all_parameters = model.get_all_parameters()
         
         for param in all_species:
             namespace_propensity[param] = all_species[param].initial_value
@@ -626,13 +631,14 @@ class StochMLDocument():
                 for ss in reactants.iter('SpeciesReference'):
                     specname = ss.get('id')
                     # The stochiometry should be an integer value, but some
-                    # exising StoxhKit models have them as floats. This is why we
-                    # need the slightly odd conversion below. 
+                    # exising StoxhKit models have them as floats. This is 
+                    # why we need the slightly odd conversion below. 
                     stoch = int(float(ss.get('stoichiometry')))
                     # Select a reference to species with name specname
                     sref = model.listOfSpecies[specname]
                     try:
-                        # The sref list should only contain one element if the XML file is valid.
+                        # The sref list should only contain one element if 
+                        # the XML file is valid.
                         reaction.reactants[specname] = stoch
                     except Exception,e:
                         StochMLImportError(e)
@@ -647,7 +653,8 @@ class StochMLDocument():
                     stoch = int(float(ss.get('stoichiometry')))
                     sref = model.listOfSpecies[specname]
                     try:
-                        # The sref list should only contain one element if the XML file is valid.
+                        # The sref list should only contain one element if 
+                        # the XML file is valid.
                         reaction.products[specname] = stoch
                     except Exception,e:
                         raise StochMLImportError(e)
@@ -659,45 +666,53 @@ class StochMLDocument():
                 reaction.massaction = True
                 reaction.type = 'mass-action'
                 # If it is mass-action, a parameter reference is needed.
-                # This has to be a reference to a species instance. We explicitly
-                # disallow a scalar value to be passed as the paramtete.  
+                # This has to be a reference to a species instance. We 
+                # explicitly disallow a scalar value to be passed as the 
+                # parameter.  
                 try:
                     ratename=reac.find('Rate').text
                     try:
                         reaction.marate = model.listOfParameters[ratename]
                     except KeyError, k:
-                        # No paramter name is given. This is a valid use case in StochKit.
-                        # We generate a name for the paramter, and create a new parameter instance.
-                        # The parameter's value should now be found in 'ratename'.
-                        generated_rate_name = "Reaction_" + name + "_rate_constant";
-                        p = Parameter(name=generated_rate_name, expression=ratename);
+                        # No paramter name is given. This is a valid use case 
+                        # in StochKit. We generate a name for the paramter, 
+                        # and create a new parameter instance. The parameter's 
+                        # value should now be found in 'ratename'.
+                        generated_rate_name = "Reaction_" + name + \
+                                                "_rate_constant"
+                        p = Parameter(name=generated_rate_name, 
+                                      expression=ratename)
                         # Try to evaluate the parameter to set its value
                         p.evaluate()
-                        model.addParameter(p)
-                        reaction.marate = model.listOfParameters[generated_rate_name]
+                        model.add_parameter(p)
+                        reaction.marate = model.listOfParameters[
+                                                generated_rate_name]
 
-                    reaction.createMassAction()
+                    reaction.create_mass_action()
                 except Exception, e:
                     raise
             elif type == 'customized':
                 try:
                     propfunc = reac.find('PropensityFunction').text
                 except Exception,e:
-                    raise InvalidStochMLError("Found a customized propensity function, but no expression was given."+e)
+                    raise InvalidStochMLError("Found a customized " +
+                    "propensity function, but no expression was given."+e)
                 reaction.propensity_function = propfunc
             else:
-                raise InvalidStochMLError("Unsupported or no reaction type given for reaction" + name)
+                raise InvalidStochMLError(
+                "Unsupported or no reaction type given for reaction" + name)
 
-            model.addReaction(reaction)
+            model.add_reaction(reaction)
         
         return model
     
-    def toString(self):
+    def to_string(self):
         """ Returns  the document as a string. """
         try:
             return etree.tostring(self.document, pretty_print=True)
         except:
-            # Hack to print pretty xml without pretty-print (requires the lxml module).
+            # Hack to print pretty xml without pretty-print 
+            # (requires the lxml module).
             doc = etree.tostring(self.document)
             xmldoc = xml.dom.minidom.parseString(doc)
             uglyXml = xmldoc.toprettyxml(indent='  ')
@@ -705,7 +720,7 @@ class StochMLDocument():
             prettyXml = text_re.sub(">\g<1></", uglyXml)
             return prettyXml
     
-    def SpeciestoElement(self,S):
+    def species_to_element(self,S):
         e = etree.Element('Species')
         idElement = etree.Element('Id')
         idElement.text = S.name
@@ -722,7 +737,7 @@ class StochMLDocument():
         
         return e
     
-    def ParametertoElement(self,P):
+    def parameter_to_element(self,P):
         e = etree.Element('Parameter')
         idElement = etree.Element('Id')
         idElement.text = P.name
@@ -732,7 +747,7 @@ class StochMLDocument():
         e.append(expressionElement)
         return e
     
-    def ReactionToElement(self,R):
+    def reaction_to_element(self,R):
         e = etree.Element('Reaction')
         
         idElement = etree.Element('Id')
@@ -811,7 +826,8 @@ class StochKitTrajectory():
 class StochKitEnsemble():
     """ 
         A stochKit ensemble is a collection of StochKitTrajectories,
-        all sharing a common set of metadata (generated from the same model instance).
+        all sharing a common set of metadata (generated from the same model 
+        instance).
     """
     
     def __init__(self,id=None,trajectories=None,parentmodel=None):
@@ -826,13 +842,14 @@ class StochKitEnsemble():
         self.tlen = dims[1]
         self.number_of_species = dims[2]
     
-    def addTrajectory(self,trajectory):
+    def add_trajectory(self,trajectory):
         self.trajectories.append(trajectory)
     
     def dump(self, filename, type="mat"):
         """ 
             Serialize to a binary data file in a matrix format.
-            Supported formats are HDF5 (requires h5py), .MAT (for Matlab V. <= 7.2, requires SciPy). 
+            Supported formats are HDF5 (requires h5py), .MAT (for Matlab V. 
+            <= 7.2, requires SciPy). 
             Matlab V > 7.3 uses HDF5 as it's base format for .mat files. 
         """
         
@@ -840,7 +857,11 @@ class StochKitEnsemble():
             # Write to Matlab format.
             filename = filename
             # Build a struct that contains some metadata and the trajectories
-            ensemble = {'trajectories':self.trajectories,'species_names':self.parentmodel.listOfSpecies,'model_parameters':self.parentmodel.listOfParameters,'number_of_species':self.number_of_species,'number_of_trajectories':self.number_of_trajectories}
+            ensemble = {'trajectories':self.trajectories, 
+                        'species_names':self.parentmodel.listOfSpecies, 
+                        'model_parameters':self.parentmodel.listOfParameters, 
+                        'number_of_species':self.number_of_species, 
+                        'number_of_trajectories':self.number_of_trajectories}
             spio.savemat(filename,{self.id:ensemble},oned_as="column")
         elif type == "hdf5":
             print "Not supported yet."
@@ -848,24 +869,26 @@ class StochKitEnsemble():
 class StochKitOutputCollection():
     """ 
         A collection of StochKit Ensembles, not necessarily generated
-        from a common model instance (i.e. they do not necessarly have the same metadata).
-        This datastructure can be useful to store e.g. data from parameter sweeps, 
-        or simply an ensemble of ensembles.
+        from a common model instance (i.e. they do not necessarly have the 
+        same metadata).
+        This datastructure can be useful to store e.g. data from parameter 
+        sweeps, or simply an ensemble of ensembles.
         
-        AH: Something like a PyTables object would be very useful here, if working
-        in a Python environment. 
+        AH: Something like a PyTables object would be very useful here, if 
+        working in a Python environment. 
         
     """
 
     def __init__(self,collection=[]):
         self.collection = collection
 
-    def addEnsemble(self,ensemble):
+    def add_ensemble(self,ensemble):
         self.collection.append(ensemble)
 
 
 def simulate(model, t=20, number_of_trajectories=10, 
-        increment=0.05, seed=None, stochkit_home=None, algorithm='ssa', job_id=None):
+        increment=0.05, seed=None, stochkit_home=None, algorithm='ssa', 
+        job_id=None):
     """ 
     Call out and run StochKit. Collect the results. 
     """
@@ -882,7 +905,7 @@ def simulate(model, t=20, number_of_trajectories=10,
     if isinstance(model, Model):
         outfile =  os.path.join(prefix_basedir, "temp_input_"+job_id+".xml")
         mfhandle = open(outfile, 'w')
-        document = StochMLDocument.fromModel(model)
+        document = StochMLDocument.from_model(model)
 
     # If the model is a Model instance, we serialize it to XML,
     # and if it is an XML file, we just make a copy.
@@ -896,7 +919,8 @@ def simulate(model, t=20, number_of_trajectories=10,
     # Assemble argument list for StochKit
     ensemblename = job_id
     
-    print "directories = os.listdir({0})".format(prefix_outdir),os.listdir(prefix_outdir)
+    print "directories = os.listdir({0})".format(prefix_outdir), \
+                    os.listdir(prefix_outdir)
     directories = os.listdir(prefix_outdir)
     
     
@@ -916,10 +940,13 @@ def simulate(model, t=20, number_of_trajectories=10,
         if os.path.isfile(os.path.join(stochkit_home, algorithm)):
             executable = os.path.join(stochkit_home, algorithm)
         else:
-            raise SimuliationError("stochkit executable '{0}' not found stochkit_home={1}".format(algorithm, stochkit_home))
+            raise SimuliationError("stochkit executable '{0}' not found \
+            stochkit_home={1}".format(algorithm, stochkit_home))
     elif os.environ.get('STOCHKIT_HOME') is not None:
-        if os.path.isfile(os.path.join(os.environ.get('STOCHKIT_HOME'), algorithm)):
-            executable = os.path.join(os.environ.get('STOCHKIT_HOME'), algorithm)
+        if os.path.isfile(os.path.join(os.environ.get('STOCHKIT_HOME'), 
+                                       algorithm)):
+            executable = os.path.join(os.environ.get('STOCHKIT_HOME'), 
+                                      algorithm)
     if executable is None:
         # try to find the executable in the path
         if os.environ.get('PATH') is not None:
@@ -928,36 +955,39 @@ def simulate(model, t=20, number_of_trajectories=10,
                     executable = os.path.join(dir, algorithm)
                     break
     if executable is None:
-        raise SimuliationError("stochkit executable '{0}' not found.  Make sure it is your path, or set STOCHKIT_HOME envronment variable'".format(algorithm))
+        raise SimuliationError("stochkit executable '{0}' not found. \
+            Make sure it is your path, or set STOCHKIT_HOME envronment \
+            variable'".format(algorithm))
 
 
 
     # Assemble the argument list
     args = ''
-    args+='--model '
-    args+=outfile
-    args+=' --out-dir '+outdir
-    args+=' -t '
-    args+=str(t)
+    args += '--model '
+    args += outfile
+    args += ' --out-dir '+outdir
+    args += ' -t '
+    args += str(t)
     num_output_points = str(int(float(t/increment)))
-    args+=' -i ' + num_output_points
-    args+=' --realizations '
-    args+=str(realizations)
-    print 'directories',directories
+    args += ' -i ' + num_output_points
+    args += ' --realizations '
+    args += str(realizations)
+    print 'directories', directories
     if ensemblename in directories:
         print 'Ensemble '+ensemblename+' already existed, using --force.'
         args+=' --force'
     
     # Only use on processor per StochKit job. 
-    args+= ' -p 1'
+    args += ' -p 1'
   
     # We keep all the trajectories by default.
-    args+=' --keep-trajectories'
+    args += ' --keep-trajectories'
 
-    args+=' --seed '
-    args+=str(seed)
+    args += ' --seed '
+    args += str(seed)
 
-    # If we are using local mode, shell out and run StochKit (SSA or Tau-leaping)
+    # If we are using local mode, shell out and run StochKit 
+    # (SSA or Tau-leaping)
     cmd = executable+' '+args
 
     # Execute
@@ -966,9 +996,11 @@ def simulate(model, t=20, number_of_trajectories=10,
         handle = subprocess.Popen(cmd.split(' '))
         return_code = handle.wait()
         if return_code != 0:
-            raise SimuliationError("Solver execution failed: '{0}'".format(cmd))
+            raise SimuliationError("Solver execution failed: \
+            '{0}'".format(cmd))
     except OSError as e:
-        raise SimuliationError("Solver execution failed: {0}\n{1}".format(cmd, e))
+        raise SimuliationError("Solver execution failed: \
+        {0}\n{1}".format(cmd, e))
     
     # Collect all the output data
     files = os.listdir(outdir + '/stats')
@@ -978,9 +1010,11 @@ def simulate(model, t=20, number_of_trajectories=10,
     
     for filename in files:
         if 'trajectory' in filename:
-            trajectories.append(numpy.loadtxt(outdir + '/trajectories/' + filename))
+            trajectories.append(numpy.loadtxt(outdir + '/trajectories/' + 
+                                    filename))
         else:
-            raise SimuliationError("Couldn't identify file '{0}' found in output folder".format(filename))
+            raise SimuliationError("Couldn't identify file '{0}' found in \
+                                    output folder".format(filename))
 
     # Clean up
     #shutil.rmtree(prefix_basedir)
@@ -1073,10 +1107,10 @@ if __name__ == '__main__':
     rxn5 = Reaction(name = 'Y nonlin',
                 reactants = {'Y':1},
                 products = {},
-                propensity_function = 'Y/(a0 + a1*(Y/150) + a2*Y*Y/(150*150))')
+                propensity_function = 'Y/(a0 + a1*(Y/150)+a2*Y*Y/(150*150))')
     
     reactions = [rxn1,rxn2,rxn3,rxn4,rxn5]
-    tyson_model.addReaction(reactions)
+    tyson_model.add_reaction(reactions)
     # returns trajectories from the tyson model
     tyson_trajectories = simulate(tyson_model)
     
@@ -1088,8 +1122,10 @@ if __name__ == '__main__':
     
     
     ax0 = plt.subplot(gs[0,0])
-    ax0.plot(tyson_trajectories[0][:,0], tyson_trajectories[0][:,1], label='X')
-    ax0.plot(tyson_trajectories[0][:,0], tyson_trajectories[0][:,2], label='Y')
+    ax0.plot(tyson_trajectories[0][:,0], tyson_trajectories[0][:,1], 
+             label='X')
+    ax0.plot(tyson_trajectories[0][:,0], tyson_trajectories[0][:,2], 
+             label='Y')
     ax0.legend()
     ax0.set_xlabel('Time')
     ax0.set_ylabel('Species Count')
