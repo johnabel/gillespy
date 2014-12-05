@@ -76,11 +76,11 @@ class Model(object):
     
     def serialize(self):
         """ Serializes a Model object to valid StochML. """
-        self.resolveParameters()
-        doc = StochMLDocument().fromModel(self)
-        return doc.toString()
+        self.resolve_parameters()
+        doc = StochMLDocument().from_model(self)
+        return doc.to_string()
         
-     def initialize(self, species_names, species_initial_values, parameter_names,
+    def initialize(self, species_names, species_initial_values, parameter_names,
                    parameter_values, volume):
         """
         Sets up the species and parameter names and values, as well as volume,
@@ -106,7 +106,7 @@ class Model(object):
         for i in xrange(self.ParamCount):
             parameters.append(Parameter(name=parameter_names[i], 
                                         expression=parameter_values[i]))
-        self.addParameter(parameters)
+        self.add_parameter(parameters)
        
         # same for species
         species = []
@@ -114,7 +114,7 @@ class Model(object):
             species.append(Species(name=species_names[i],
                                    initial_value = parameter_values[i]))
             
-        self.addSpecies(species)
+        self.add_species(species)
     
 
     def update_namespace(self):
@@ -339,6 +339,8 @@ class Reaction():
         # the propensity function if set to True.
         if propensity_function is not None:
             self.massaction = False
+        else:
+            self.massaction = True
 
 
         self.propensity_function = propensity_function
@@ -364,7 +366,7 @@ class Reaction():
 
         if self.massaction:
             self.type = "mass-action"
-            if rate == None:
+            if rate is None:
                 raise ReactionError("Reaction : A mass-action propensity has\
                  to have a rate.")
             self.marate = rate
@@ -448,7 +450,7 @@ class StochMLDocument():
         self.document = etree.Element("Model")
     
     @classmethod
-    def fromModel(cls,model):
+    def from_model(cls,model):
         """ Creates an StochKit XML document from an exisiting Mdoel object.
             This method assumes that all the parameters in the model are already resolved
             to scalar floats (see Model.resolveParamters). 
@@ -534,7 +536,7 @@ class StochMLDocument():
         md.document = root
         return md
 
-    def toModel(self,name):
+    def to_model(self,name):
         """ Instantiates a Model object from a StochMLDocument. """
         
         # Empty model
@@ -919,8 +921,6 @@ def simulate(model, t=20, number_of_trajectories=10,
     # Assemble argument list for StochKit
     ensemblename = job_id
     
-    print "directories = os.listdir({0})".format(prefix_outdir), \
-                    os.listdir(prefix_outdir)
     directories = os.listdir(prefix_outdir)
     
     
@@ -972,7 +972,6 @@ def simulate(model, t=20, number_of_trajectories=10,
     args += ' -i ' + num_output_points
     args += ' --realizations '
     args += str(realizations)
-    print 'directories', directories
     if ensemblename in directories:
         print 'Ensemble '+ensemblename+' already existed, using --force.'
         args+=' --force'
@@ -992,7 +991,6 @@ def simulate(model, t=20, number_of_trajectories=10,
 
     # Execute
     try:
-        print cmd
         handle = subprocess.Popen(cmd.split(' '))
         return_code = handle.wait()
         if return_code != 0:
@@ -1017,7 +1015,7 @@ def simulate(model, t=20, number_of_trajectories=10,
                                     output folder".format(filename))
 
     # Clean up
-    #shutil.rmtree(prefix_basedir)
+    shutil.rmtree(prefix_basedir)
 
     return trajectories
 
@@ -1048,9 +1046,6 @@ if __name__ == '__main__':
     
     # stochastic volume parameter, omega
     omega = 150
-    
-    {'parameters':{'P':2,
-                    'kt':20,
     
     # parameter names consists of a list of strings    
     parameter_names = ['P','kt','kd','a0','a1','a2','kdx']
@@ -1088,8 +1083,7 @@ if __name__ == '__main__':
     rxn2 = Reaction(name = 'X degradation',
                 reactants = {'X':1},
                 products = {},
-                rate = kdx)
-                #propensity_function = 'kdx*X')
+                propensity_function = 'kdx*X')
     
     # creation of Y:
     rxn3 = Reaction(name = 'Y production',
