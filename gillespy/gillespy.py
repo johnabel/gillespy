@@ -86,7 +86,7 @@ class Model(object):
         Sets up the species and parameter names and values, as well as volume,
         for a Model object.
         """
-                  
+        sys.stderr.write("WARNING: this function is depricated")
         self.species_names      = species_names
         self.species_initial    = species_initial_values
         self.parameter_names    = parameter_names
@@ -887,137 +887,163 @@ class StochKitOutputCollection():
     def add_ensemble(self,ensemble):
         self.collection.append(ensemble)
 
+class GillesPySolver():
+    ''' abstract class for simulation methods '''
 
-def simulate(model, t=20, number_of_trajectories=10, 
-        increment=0.05, seed=None, stochkit_home=None, algorithm='ssa', 
-        job_id=None):
-    """ 
-    Call out and run StochKit. Collect the results. 
-    """
-    
-    # We write all StochKit input and output files to a temporary folder
-    prefix_basedir = tempfile.mkdtemp()
-    prefix_outdir = os.path.join(prefix_basedir, 'output')
-    os.mkdir(os.path.join(prefix_basedir, 'output'))
-    
-    if job_id is None:
-        job_id = str(uuid.uuid4())
-    
-    # Write a temporary StochKit2 input file.
-    if isinstance(model, Model):
-        outfile =  os.path.join(prefix_basedir, "temp_input_"+job_id+".xml")
-        mfhandle = open(outfile, 'w')
-        document = StochMLDocument.from_model(model)
-
-    # If the model is a Model instance, we serialize it to XML,
-    # and if it is an XML file, we just make a copy.
-    if isinstance(model, Model):
-        document = model.serialize()
-        mfhandle.write(document)
-        mfhandle.close()
-    elif isinstance(model, str):
-        outfile = model
-
-    # Assemble argument list for StochKit
-    ensemblename = job_id
-    
-    directories = os.listdir(prefix_outdir)
-    
-    
-    outdir = prefix_outdir+'/'+ensemblename
-    print 'outdir',outdir
+    @classmethod
+    def simulate(cls, model, t=20, number_of_trajectories=10,
+            increment=0.05, seed=None, stochkit_home=None, algorithm=None,
+            job_id=None):
+        """ 
+        Call out and run the solver. Collect the results.
+        """
         
-    realizations = number_of_trajectories
-    if increment == None:
-        increment = t/10;
+        if algorithm is None:
+            raise SimuliationError("No algorithm selected")
+        
+        # We write all StochKit input and output files to a temporary folder
+        prefix_basedir = tempfile.mkdtemp()
+        prefix_outdir = os.path.join(prefix_basedir, 'output')
+        os.mkdir(os.path.join(prefix_basedir, 'output'))
+        
+        if job_id is None:
+            job_id = str(uuid.uuid4())
+        
+        # Write a temporary StochKit2 input file.
+        if isinstance(model, Model):
+            outfile =  os.path.join(prefix_basedir, "temp_input_"+job_id+".xml")
+            mfhandle = open(outfile, 'w')
+            document = StochMLDocument.from_model(model)
 
-    if seed is None:
-        seed = 0
+        # If the model is a Model instance, we serialize it to XML,
+        # and if it is an XML file, we just make a copy.
+        if isinstance(model, Model):
+            document = model.serialize()
+            mfhandle.write(document)
+            mfhandle.close()
+        elif isinstance(model, str):
+            outfile = model
 
-    # Algorithm, SSA or Tau-leaping?
-    executable = None
-    if stochkit_home is not None:
-        if os.path.isfile(os.path.join(stochkit_home, algorithm)):
-            executable = os.path.join(stochkit_home, algorithm)
-        else:
-            raise SimuliationError("stochkit executable '{0}' not found \
-            stochkit_home={1}".format(algorithm, stochkit_home))
-    elif os.environ.get('STOCHKIT_HOME') is not None:
-        if os.path.isfile(os.path.join(os.environ.get('STOCHKIT_HOME'), 
-                                       algorithm)):
-            executable = os.path.join(os.environ.get('STOCHKIT_HOME'), 
-                                      algorithm)
-    if executable is None:
-        # try to find the executable in the path
-        if os.environ.get('PATH') is not None:
-            for dir in os.environ.get('PATH').split(':'):
-                if os.path.isfile(os.path.join(dir, algorithm)):
-                    executable = os.path.join(dir, algorithm)
-                    break
-    if executable is None:
-        raise SimuliationError("stochkit executable '{0}' not found. \
-            Make sure it is your path, or set STOCHKIT_HOME envronment \
-            variable'".format(algorithm))
+        # Assemble argument list for StochKit
+        ensemblename = job_id
+        
+        directories = os.listdir(prefix_outdir)
+        
+        
+        outdir = prefix_outdir+'/'+ensemblename
+        print 'outdir',outdir
+            
+        realizations = number_of_trajectories
+        if increment == None:
+            increment = t/10;
+
+        if seed is None:
+            seed = 0
+
+        # Algorithm, SSA or Tau-leaping?
+        executable = None
+        if stochkit_home is not None:
+            if os.path.isfile(os.path.join(stochkit_home, algorithm)):
+                executable = os.path.join(stochkit_home, algorithm)
+            else:
+                raise SimuliationError("stochkit executable '{0}' not found \
+                stochkit_home={1}".format(algorithm, stochkit_home))
+        elif os.environ.get('STOCHKIT_HOME') is not None:
+            if os.path.isfile(os.path.join(os.environ.get('STOCHKIT_HOME'), 
+                                           algorithm)):
+                executable = os.path.join(os.environ.get('STOCHKIT_HOME'), 
+                                          algorithm)
+        if executable is None:
+            # try to find the executable in the path
+            if os.environ.get('PATH') is not None:
+                for dir in os.environ.get('PATH').split(':'):
+                    if os.path.isfile(os.path.join(dir, algorithm)):
+                        executable = os.path.join(dir, algorithm)
+                        break
+        if executable is None:
+            raise SimuliationError("stochkit executable '{0}' not found. \
+                Make sure it is your path, or set STOCHKIT_HOME envronment \
+                variable'".format(algorithm))
 
 
 
-    # Assemble the argument list
-    args = ''
-    args += '--model '
-    args += outfile
-    args += ' --out-dir '+outdir
-    args += ' -t '
-    args += str(t)
-    num_output_points = str(int(float(t/increment)))
-    args += ' -i ' + num_output_points
-    args += ' --realizations '
-    args += str(realizations)
-    if ensemblename in directories:
-        print 'Ensemble '+ensemblename+' already existed, using --force.'
-        args+=' --force'
-    
-    # Only use on processor per StochKit job. 
-    args += ' -p 1'
-  
-    # We keep all the trajectories by default.
-    args += ' --keep-trajectories'
+        # Assemble the argument list
+        args = ''
+        args += '--model '
+        args += outfile
+        args += ' --out-dir '+outdir
+        args += ' -t '
+        args += str(t)
+        num_output_points = str(int(float(t/increment)))
+        args += ' -i ' + num_output_points
+        args += ' --realizations '
+        args += str(realizations)
+        if ensemblename in directories:
+            print 'Ensemble '+ensemblename+' already existed, using --force.'
+            args+=' --force'
+        
+        # Only use on processor per StochKit job. 
+        args += ' -p 1'
+      
+        # We keep all the trajectories by default.
+        args += ' --keep-trajectories'
 
-    args += ' --seed '
-    args += str(seed)
+        args += ' --seed '
+        args += str(seed)
 
-    # If we are using local mode, shell out and run StochKit 
-    # (SSA or Tau-leaping)
-    cmd = executable+' '+args
+        # If we are using local mode, shell out and run StochKit 
+        # (SSA or Tau-leaping)
+        cmd = executable+' '+args
 
-    # Execute
-    try:
-        handle = subprocess.Popen(cmd.split(' '))
-        return_code = handle.wait()
-        if return_code != 0:
+        # Execute
+        try:
+            handle = subprocess.Popen(cmd.split(' '))
+            return_code = handle.wait()
+            if return_code != 0:
+                raise SimuliationError("Solver execution failed: \
+                '{0}'".format(cmd))
+        except OSError as e:
             raise SimuliationError("Solver execution failed: \
-            '{0}'".format(cmd))
-    except OSError as e:
-        raise SimuliationError("Solver execution failed: \
-        {0}\n{1}".format(cmd, e))
-    
-    # Collect all the output data
-    files = os.listdir(outdir + '/stats')
-       
-    trajectories = []
-    files = os.listdir(outdir + '/trajectories')
-    
-    for filename in files:
-        if 'trajectory' in filename:
-            trajectories.append(numpy.loadtxt(outdir + '/trajectories/' + 
-                                    filename))
-        else:
-            raise SimuliationError("Couldn't identify file '{0}' found in \
-                                    output folder".format(filename))
+            {0}\n{1}".format(cmd, e))
+        
+        # Collect all the output data
+        files = os.listdir(outdir + '/stats')
+           
+        trajectories = []
+        files = os.listdir(outdir + '/trajectories')
+        
+        for filename in files:
+            if 'trajectory' in filename:
+                trajectories.append(numpy.loadtxt(outdir + '/trajectories/' + 
+                                        filename))
+            else:
+                raise SimuliationError("Couldn't identify file '{0}' found in \
+                                        output folder".format(filename))
 
-    # Clean up
-    shutil.rmtree(prefix_basedir)
+        # Clean up
+        shutil.rmtree(prefix_basedir)
 
-    return trajectories
+        return trajectories
+
+class StochKitSolver(GillesPySolver):
+    ''' Solver class to simulate Stochasticly with StockKit. '''
+    
+    @classmethod
+    def simulate(cls, model, t=20, number_of_trajectories=10,
+            increment=0.05, seed=None, stochkit_home=None, algorithm='ssa',
+            job_id=None):
+        return GillesPySolver.simulate(model,t, number_of_trajectories, increment, seed, stochkit_home, algorithm, job_id)
+
+
+class StochKiODEtSolver(GillesPySolver):
+    ''' Solver class to simulate Stochasticly with StockKit. '''
+    
+    @classmethod
+    def simulate(cls, model, t=20, number_of_trajectories=10,
+            increment=0.05, seed=None, stochkit_home=None, algorithm='stochkit_ode.py',
+            job_id=None):
+        return GillesPySolver.simulate(model,t, number_of_trajectories, increment, seed, stochkit_home, algorithm, job_id)
+
 
 # Exceptions
 class StochMLImportError(Exception):
