@@ -67,11 +67,54 @@ class Model(object):
 
         # This defines the unit system at work for all numbers in the model
         #   It should be a logical error to leave this undefined, subclasses should set it
-        self.units = None
+        self.units = "population"
         
         # Dict that holds flattended parameters and species for
         # evaluation of expressions in the scope of the model.
         self.namespace = OrderedDict([])
+    
+    def serialize(self):
+        """ Serializes a Model object to valid StochML. """
+        self.resolveParameters()
+        doc = StochMLDocument().fromModel(self)
+        return doc.toString()
+        
+     def initialize(self, species_names, species_initial_values, parameter_names,
+                   parameter_values, volume):
+        """
+        Sets up the species and parameter names and values, as well as volume,
+        for a Model object.
+        """
+                  
+        self.species_names      = species_names
+        self.species_initial    = species_initial_values
+        self.parameter_names    = parameter_names
+        self.parameter_values   = parameter_values
+        self.volume             = volume
+        
+        # note: we are assuming here that all species values are POPULATION
+        # and same for parameter values in terms of population. We would
+        # have to convert otherwise.
+        
+        self.ParamCount = len(self.parameter_names)
+        self.SpecCount  = len(self.species_names)
+        
+        # converts parameter and values to list of parameter objects
+        # adds to model
+        parameters = []
+        for i in xrange(self.ParamCount):
+            parameters.append(Parameter(name=parameter_names[i], 
+                                        expression=parameter_values[i]))
+        self.addParameter(parameters)
+       
+        # same for species
+        species = []
+        for i in xrange(self.SpecCount):
+            species.append(Species(name=species_names[i],
+                                   initial_value = parameter_values[i]))
+            
+        self.addSpecies(species)
+    
 
     def updateNamespace(self):
         """ Create a dict with flattened parameter and species objects. """
@@ -281,12 +324,17 @@ class Reaction():
         self.name = name
         self.annotation = ""
         
+        if rate is None and propensity_function is None:
+            raise ReactionError("You must specify either a mass-action rate or a propensity function")
+
         # We might use this flag in the future to automatically generate
-        # the propensity function if set to True. 
-        self.massaction = massaction
+        # the propensity function if set to True.
+        if propensity_function is not None:
+            self.massaction = False
+
 
         self.propensity_function = propensity_function
-        if self.propensity_function !=None and self.massaction:
+        if self.propensity_function is not None and self.massaction:
             errmsg = "Reaction "+self.name +" You cannot set the propensity type to mass-action and simultaneously set a propensity function."
             raise ReactionError(errmsg)
         
@@ -382,57 +430,16 @@ class SimuliationError(Exception):
 
 
 
-class gillespy_model(Model):
-    """ gillespy_model extends a well mixed model with StochKit specific serialization. """
-    def __init__(self, *args, **kwargs):
-        super(gillespy_model, self).__init__(*args, **kwargs)
+#class gillespy_model(Model):
+#    """ gillespy_model extends a well mixed model with StochKit specific serialization. """
+#    def __init__(self, *args, **kwargs):
+#        super(gillespy_model, self).__init__(*args, **kwargs)
+#
+#        self.units = "population"
 
-        self.units = "population"
-
-    def serialize(self):
-        """ Serializes a Model object to valid StochML. """
-        self.resolveParameters()
-        doc = StochMLDocument().fromModel(self)
-        return doc.toString()
-        
-    def initialize(self, species_names, species_initial, parameter_names, 
-                   parameter_values, volume):
-        """
-        Sets up the species and parameter names and values, as well as volume,
-        for a gillespy_model object.
-        """
-                  
-        self.species_names      = species_names
-        self.species_initial    = species_initial
-        self.parameter_names    = parameter_names
-        self.parameter_values   = parameter_values
-        self.volume             = volume
-        
-        # note: we are assuming here that all species values are POPULATION
-        # and same for parameter values in terms of population. We would
-        # have to convert otherwise.
-        
-        self.ParamCount = len(self.parameter_names)
-        self.SpecCount  = len(self.species_names)
-        
-        # converts parameter and values to list of parameter objects
-        # adds to model
-        parameters = []
-        for i in xrange(self.ParamCount):
-            parameters.append(Parameter(name=parameter_names[i], 
-                                        expression=parameter_values[i]))
-        self.addParameter(parameters)
-       
-        # same for species
-        species = []
-        for i in xrange(self.SpecCount):
-            species.append(Species(name=species_names[i],
-                                   initial_value = parameter_values[i]))
-            
-        self.addSpecies(species)
 
 class StochMLDocument():
-    """ Serializiation and deserialization of a gillespy_model to/from 
+    """ Serializiation and deserialization of a Model to/from
         the native StochKit2 XML format. """
     
     def __init__(self):
@@ -441,7 +448,7 @@ class StochMLDocument():
     
     @classmethod
     def fromModel(cls,model):
-        """ Creates an StochKit XML document from an exisiting gillespy_model object.
+        """ Creates an StochKit XML document from an exisiting Mdoel object.
             This method assumes that all the parameters in the model are already resolved
             to scalar floats (see Model.resolveParamters). 
                 
@@ -524,10 +531,10 @@ class StochMLDocument():
         return md
 
     def toModel(self,name):
-        """ Instantiates a gillespy_model object from a StochMLDocument. """
+        """ Instantiates a Model object from a StochMLDocument. """
         
         # Empty model
-        model = gillespy_model(name=name)
+        model = Model(name=name)
         root = self.document
         
         # Try to set name from document
@@ -872,14 +879,14 @@ def simulate(model, t=20, number_of_trajectories=10,
         job_id = str(uuid.uuid4())
     
     # Write a temporary StochKit2 input file.
-    if isinstance(model, gillespy_model):
+    if isinstance(model, Model):
         outfile =  os.path.join(prefix_basedir, "temp_input_"+job_id+".xml")
         mfhandle = open(outfile, 'w')
         document = StochMLDocument.fromModel(model)
 
-    # If the model is a gillespy_model instance, we serialize it to XML,
+    # If the model is a Model instance, we serialize it to XML,
     # and if it is an XML file, we just make a copy.
-    if isinstance(model, gillespy_model):
+    if isinstance(model, Model):
         document = model.serialize()
         mfhandle.write(document)
         mfhandle.close()
@@ -1008,6 +1015,9 @@ if __name__ == '__main__':
     # stochastic volume parameter, omega
     omega = 150
     
+    {'parameters':{'P':2,
+                    'kt':20,
+    
     # parameter names consists of a list of strings    
     parameter_names = ['P','kt','kd','a0','a1','a2','kdx']
     
@@ -1025,7 +1035,7 @@ if __name__ == '__main__':
     
     # To set up the model, first create an empty model object. Then, add 
     # species and parameters as was set up above.
-    tyson_model = gillespy_model(name = "tyson-2-state")    
+    tyson_model = Model(name = "tyson-2-state")
     tyson_model.initialize(species_names, species_initial,
                            parameter_names, parameter_values, omega)
     
@@ -1044,7 +1054,8 @@ if __name__ == '__main__':
     rxn2 = Reaction(name = 'X degradation',
                 reactants = {'X':1},
                 products = {},
-                propensity_function = 'kdx*X')
+                rate = kdx)
+                #propensity_function = 'kdx*X')
     
     # creation of Y:
     rxn3 = Reaction(name = 'Y production',
@@ -1066,7 +1077,6 @@ if __name__ == '__main__':
     
     reactions = [rxn1,rxn2,rxn3,rxn4,rxn5]
     tyson_model.addReaction(reactions)
-    pdb.set_trace() 
     # returns trajectories from the tyson model
     tyson_trajectories = simulate(tyson_model)
     
