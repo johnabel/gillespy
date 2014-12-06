@@ -95,7 +95,7 @@ if __name__ == '__main__':
     # =============================================  
     from matplotlib import gridspec
     
-    plt.figure(figsize=(3.5*2,2.62))
+    plt.figure(figsize=(3.5*2*3/4,2.62*3/4))
     gs = gridspec.GridSpec(1,2)
     
     
