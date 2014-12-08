@@ -1035,7 +1035,7 @@ class StochKitSolver(GillesPySolver):
         return GillesPySolver.simulate(model,t, number_of_trajectories, increment, seed, stochkit_home, algorithm, job_id)
 
 
-class StochKiODEtSolver(GillesPySolver):
+class StochKitODESolver(GillesPySolver):
     ''' Solver class to simulate Stochasticly with StockKit. '''
     
     @classmethod
