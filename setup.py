@@ -2,7 +2,7 @@ from setuptools import setup
 import subprocess
 
 print "start"
-subprocess.call("./sleep.sh")
+subprocess.call("./install-stochkit.sh")
 print "end, now installing"
 
 setup(name = "gillespy",
