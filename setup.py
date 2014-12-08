@@ -21,6 +21,6 @@ setup(name = "gillespy",
 
       url = "http://www.github.com/JohnAbel/GillesPy" # we don't really yet have one
 
-      #download_url = "https://github.com/pyurdme/pyurdme/tarball/master/v1.0.1"
+      download_url = "https://github.com/JohnAbel/GillesPy/tarball/master/"
       
       )
