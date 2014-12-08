@@ -11,7 +11,7 @@ class Tyson2StateOscillator(gillespy.Model):
     Here, as a test case, we run a simple two-state oscillator (Novak & Tyson 
     2008) as an example of a stochastic reaction system.
     """
-    def __init__(self, parameter_values=None, omega=150):
+    def __init__(self, parameter_values=None, omega=300):
         """
         """
         gillespy.Model.__init__(self, name="tyson-2-state", volume=omega)
@@ -19,12 +19,14 @@ class Tyson2StateOscillator(gillespy.Model):
         # Define model species, initial values, parameters, and volume
         # =============================================    
         
-        
-        # Parameter values  have been converted to be in population, rather than
-        # concentration units. For example, a concentration unit of 0.5mol/(L*s)
+        # Parameter values  for this biochemical system are given in 
+        # concentration units. However, stochastic systems must use population
+        # values. For example, a concentration unit of 0.5mol/(L*s)
         # is multiplied by a volume unit (omega), to get a population/s rate
-        # constant. As this scaling depends on omega values for non-mass action
-        # terms, we have left omega as 
+        # constant. Thus, for our non-mass action reactions, we include the 
+        # parameter vol, in order to convert population units to concentration
+        # units.
+
         P = gillespy.Parameter(name='P', expression=2.0)
         kt = gillespy.Parameter(name='kt', expression=20.0)
         kd = gillespy.Parameter(name='kd', expression=1.0)
@@ -32,11 +34,11 @@ class Tyson2StateOscillator(gillespy.Model):
         a1 = gillespy.Parameter(name='a1', expression=0.05)
         a2 = gillespy.Parameter(name='a2', expression=0.1)
         kdx = gillespy.Parameter(name='kdx', expression=1.0)
-        self.add_parameter([P, kt, kd, a0, a1, a2, kdx])
+        vol = gillespy.Parameter(name='vol',expression=omega) # conversion
+        self.add_parameter([P, kt, kd, a0, a1, a2, kdx, vol])
         
         # Species
         # Initial values of each species (concentration converted to pop.)
-        species_names = ['X','Y']
         X = gillespy.Species(name='X', initial_value=int(0.65609071*omega))
         Y = gillespy.Species(name='Y', initial_value=int(0.85088331*omega))
         self.add_species([X, Y])
@@ -49,7 +51,7 @@ class Tyson2StateOscillator(gillespy.Model):
         rxn1 = gillespy.Reaction(name = 'X production',
                         reactants = {},
                         products = {X:1},
-                        propensity_function = '150*1/(1+(Y*Y/((150*150))))')
+                        propensity_function = 'vol*1/(1+(Y*Y/((vol*vol))))')
         
         # degradadation of X:
         rxn2 = gillespy.Reaction(name = 'X degradation',
@@ -73,7 +75,7 @@ class Tyson2StateOscillator(gillespy.Model):
         rxn5 = gillespy.Reaction(name = 'Y nonlin',
                     reactants = {Y:1},
                     products = {},
-                    propensity_function = 'Y/(a0 + a1*(Y/150)+a2*Y*Y/(150*150))')
+                    propensity_function = 'Y/(a0 + a1*(Y/vol)+a2*Y*Y/(vol*vol))')
         
         self.add_reaction([rxn1,rxn2,rxn3,rxn4,rxn5])
 

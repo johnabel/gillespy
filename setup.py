@@ -1,7 +1,12 @@
 from setuptools import setup
+import subprocess
+
+print "start"
+subprocess.call("./sleep.sh")
+print "end, now installing"
 
 setup(name = "gillespy",
-      version = "1.0.1",
+      version = "0.0.1",
       packages = ['gillespy'],
       description = 'Python interface to the Gillespie StochKit2 solvers',
       
@@ -12,9 +17,9 @@ setup(name = "gillespy",
       author = "John H. Abel, Brian Drawert, Andreas Hellander",
       author_email = ["jhabel01@gmail.com", "briandrawert@gmail.com", "andreas.hellander@gmail.com"],
       license = "GPL",
-      keywords = "gillespy, gillespie algorithm, stochkit, stochastic simulation"
+      keywords = "gillespy, gillespie algorithm, stochkit, stochastic simulation",
 
-      url = "http://www.github.com/JohnAbel/GillesPy" # we don't really yet have one
+      url = "http://www.github.com/JohnAbel/GillesPy", # we don't really yet have one
 
       download_url = "https://github.com/JohnAbel/GillesPy/tarball/master/"
       
