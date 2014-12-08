@@ -11,7 +11,7 @@ class Tyson2StateOscillator(gillespy.Model):
     Here, as a test case, we run a simple two-state oscillator (Novak & Tyson 
     2008) as an example of a stochastic reaction system.
     """
-    def __init__(self, parameter_values=None, omega=150):
+    def __init__(self, parameter_values=None, omega=300):
         """
         """
         gillespy.Model.__init__(self, name="tyson-2-state", volume=omega)
@@ -75,7 +75,7 @@ class Tyson2StateOscillator(gillespy.Model):
         rxn5 = gillespy.Reaction(name = 'Y nonlin',
                     reactants = {Y:1},
                     products = {},
-                    propensity_function = 'Y/(a0 + v*(Y/vol)+a2*Y*Y/(vol*vol))')
+                    propensity_function = 'Y/(a0 + a1*(Y/vol)+a2*Y*Y/(vol*vol))')
         
         self.add_reaction([rxn1,rxn2,rxn3,rxn4,rxn5])
 
