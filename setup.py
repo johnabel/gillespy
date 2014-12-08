@@ -19,7 +19,7 @@ setup(name = "gillespy",
       license = "GPL",
       keywords = "gillespy, gillespie algorithm, stochkit, stochastic simulation",
 
-      url = "http://www.github.com/JohnAbel/GillesPy" # we don't really yet have one
+      url = "http://www.github.com/JohnAbel/GillesPy", # we don't really yet have one
 
       download_url = "https://github.com/JohnAbel/GillesPy/tarball/master/"
       

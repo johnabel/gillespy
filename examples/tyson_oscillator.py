@@ -19,21 +19,18 @@ class Tyson2StateOscillator(gillespy.Model):
         # Define model species, initial values, parameters, and volume
         # =============================================    
         
-        
-<<<<<<< HEAD
         # Parameter values  for this biochemical system are given in 
         # concentration units. However, stochastic systems must use population
         # values. Thus, for our non-mass action reactions, we include the 
         # parameter vol, in order to convert population units to concentration
         # units.
-        
-=======
+
         # Parameter values  have been converted to be in population, rather than
         # concentration units. For example, a concentration unit of 0.5mol/(L*s)
         # is multiplied by a volume unit (omega), to get a population/s rate
         # constant. As this scaling depends on omega values for non-mass action
         # terms, we have left omega as 
->>>>>>> 553093e349c116ffb661897e949e3b66a1baa46b
+
         P = gillespy.Parameter(name='P', expression=2.0)
         kt = gillespy.Parameter(name='kt', expression=20.0)
         kd = gillespy.Parameter(name='kd', expression=1.0)
