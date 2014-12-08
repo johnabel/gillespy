@@ -1,0 +1,22 @@
+gillespy package
+================
+
+Submodules
+----------
+
+gillespy.gillespy module
+------------------------
+
+.. automodule:: gillespy.gillespy
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+
+Module contents
+---------------
+
+.. automodule:: gillespy
+    :members:
+    :undoc-members:
+    :show-inheritance:
