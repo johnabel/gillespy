@@ -24,7 +24,7 @@ class Tyson2StateOscillator(gillespy.Model):
         # concentration units. For example, a concentration unit of 0.5mol/(L*s)
         # is multiplied by a volume unit (omega), to get a population/s rate
         # constant. As this scaling depends on omega values for non-mass action
-	# terms, we have left omega as 
+        # terms, we have left omega as 
         P = gillespy.Parameter(name='P', expression=2.0)
         kt = gillespy.Parameter(name='kt', expression=20.0)
         kd = gillespy.Parameter(name='kd', expression=1.0)

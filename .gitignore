@@ -2,6 +2,7 @@
 
 # VIM swap files
 *.sw[op]
+*~
 
 # Profiled functions
 *.profile
