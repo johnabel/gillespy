@@ -6,26 +6,19 @@ import sys
 sys.path.append('../')
 import gillespy
 
-class Tyson2StateOscillator(gillespy.Model):
+class Simple1(gillespy.Model):
     """
-    Here, as a test case, we run a simple two-state oscillator (Novak & Tyson 
-    2008) as an example of a stochastic reaction system.
+    This simple example 
     """
     def __init__(self, parameter_values=None):
         """
         """
-        gillespy.Model.__init__(self, name="tyson-2-state")
+        gillespy.Model.__init__(self, name="simple1")
         # =============================================
         # Define model species, initial values, parameters, and volume
         # =============================================    
         
-        # Parameter values  for this biochemical system are given in 
-        # concentration units. However, stochastic systems must use population
-        # values. For example, a concentration unit of 0.5mol/(L*s)
-        # is multiplied by a volume unit, to get a population/s rate
-        # constant. Thus, for our non-mass action reactions, we include the 
-        # parameter "vol" in order to convert population units to concentration
-        # units. Volume here = 300.
+        # Parameters and species are already in population units
 
         P = gillespy.Parameter(name='P', expression=2.0)
         kt = gillespy.Parameter(name='kt', expression=20.0)
@@ -34,13 +27,13 @@ class Tyson2StateOscillator(gillespy.Model):
         a1 = gillespy.Parameter(name='a1', expression=0.05)
         a2 = gillespy.Parameter(name='a2', expression=0.1)
         kdx = gillespy.Parameter(name='kdx', expression=1.0)
-        vol = gillespy.Parameter(name='vol',expression=300)
+        vol = gillespy.Parameter(name='vol',expression=omega) # conversion
         self.add_parameter([P, kt, kd, a0, a1, a2, kdx, vol])
         
         # Species
         # Initial values of each species (concentration converted to pop.)
-        X = gillespy.Species(name='X', initial_value=int(0.65609071*300))
-        Y = gillespy.Species(name='Y', initial_value=int(0.85088331*300))
+        X = gillespy.Species(name='X', initial_value=int(0.65609071*omega))
+        Y = gillespy.Species(name='Y', initial_value=int(0.85088331*omega))
         self.add_species([X, Y])
         
         # =============================================  

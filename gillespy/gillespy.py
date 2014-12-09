@@ -47,7 +47,7 @@ class Model(object):
     
     """
     
-    def __init__(self,name="",volume = None):
+    def __init__(self,name=""):
         """ Create an empty model. """
         
         # The name that the model is referenced by (should be a String)
@@ -61,10 +61,6 @@ class Model(object):
         self.listOfParameters = OrderedDict()
         self.listOfSpecies    = OrderedDict()
         self.listOfReactions  = OrderedDict()
-        
-        # A well mixed model has an optional volume parameter. 
-        # This should be a Parameter
-        self.volume = volume;
 
         # This defines the unit system at work for all numbers in the model
         #   It should be a logical error to leave this undefined, subclasses should set it
@@ -81,9 +77,9 @@ class Model(object):
         return doc.to_string()
         
     def initialize(self, species_names, species_initial_values, parameter_names,
-                   parameter_values, volume):
+                   parameter_values):
         """
-        Sets up the species and parameter names and values, as well as volume,
+        Sets up the species and parameter names and values
         for a Model object.
         """
         sys.stderr.write("WARNING: this function is depricated")
@@ -91,7 +87,7 @@ class Model(object):
         self.species_initial    = species_initial_values
         self.parameter_names    = parameter_names
         self.parameter_values   = parameter_values
-        self.volume             = volume
+
         
         # note: we are assuming here that all species values are POPULATION
         # and same for parameter values in terms of population. We would
@@ -585,8 +581,8 @@ class StochMLDocument():
         for px in root.iter('Parameter'):
             name = px.find('Id').text
             expr = px.find('Expression').text
-            if name.lower() == 'volume':
-                model.volume = Parameter(name, expression = expr)
+            if name.lower() == 'vol':
+                model.vol = Parameter(name, expression = expr)
             else:
                 p = Parameter(name,expression=expr)
                 # Try to evaluate the expression in the empty namespace 
@@ -1065,76 +1061,7 @@ if __name__ == '__main__':
     Here, as a test case, we run a simple two-state oscillator (Novak & Tyson 
     2008) as an example of a stochastic reaction system.
     """
-        
-    # =============================================
-    # Define model species, initial values, parameters, and volume
-    # =============================================    
-    
-    # stochastic volume parameter, omega
-    omega = 150
-    
-    # parameter names consists of a list of strings    
-    parameter_names = ['P','kt','kd','a0','a1','a2','kdx']
-    
-    # Parameter values consists of a list or numpy array of floats.
-    # These have been converted to be in population, rather than concentration
-    # units. For example, a concentration unit of 0.5mol/(L*s) is multiplied 
-    # by a volume unit (omega), to get a population/s rate constant.
-    parameter_values = np.array([2., 20., 1., 0.005, 0.05, 0.1, 1.])
-    
-    # Species names
-    species_names = ['X','Y']
-    
-    # Initial values of each species (concentration converted to pop.)
-    species_initial = (np.array([ 0.65609071,  0.85088331])*omega).astype(int)
-    
-    # To set up the model, first create an empty model object. Then, add 
-    # species and parameters as was set up above.
-    tyson_model = Model(name = "tyson-2-state")
-    tyson_model.initialize(species_names, species_initial,
-                           parameter_names, parameter_values, omega)
-    
-    
-    # =============================================  
-    # Define the reactions within the model
-    # =============================================  
-    
-    # creation of X:
-    rxn1 = Reaction(name = 'X production',
-                    reactants = {},
-                    products = {'X':1},
-                    propensity_function = '150*1/(1+(Y*Y/((150*150))))')
-    
-    # degradadation of X:
-    rxn2 = Reaction(name = 'X degradation',
-                reactants = {'X':1},
-                products = {},
-                propensity_function = 'kdx*X')
-    
-    # creation of Y:
-    rxn3 = Reaction(name = 'Y production',
-                reactants = {},
-                products = {'Y':1},
-                propensity_function = 'X*kt')
-    
-    # degradation of Y:
-    rxn4 = Reaction(name = 'Y degradation',
-                reactants = {'Y':1},
-                products = {},
-                propensity_function = 'kd*Y')
-        
-    # nonlinear Y term:
-    rxn5 = Reaction(name = 'Y nonlin',
-                reactants = {'Y':1},
-                products = {},
-                propensity_function = 'Y/(a0 + a1*(Y/150)+a2*Y*Y/(150*150))')
-    
-    reactions = [rxn1,rxn2,rxn3,rxn4,rxn5]
-    tyson_model.add_reaction(reactions)
-    # returns trajectories from the tyson model
-    tyson_trajectories = simulate(tyson_model)
-    
-    # plot just the first trajectory, 0, in both time and phase space:
+
     from matplotlib import gridspec
     
     plt.figure(figsize=(3.5*2*3/4,2.62*3/4))
