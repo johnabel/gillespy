@@ -1,9 +1,8 @@
 from setuptools import setup
 import subprocess
 
-print "start"
+
 subprocess.call("./install-stochkit.sh")
-print "end, now installing"
 
 setup(name = "gillespy",
       version = "0.0.1",
