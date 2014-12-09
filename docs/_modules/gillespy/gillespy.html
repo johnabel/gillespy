@@ -96,7 +96,7 @@
 <span class="sd">    </span>
 <span class="sd">    &quot;&quot;&quot;</span>
     
-    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">name</span><span class="o">=</span><span class="s">&quot;&quot;</span><span class="p">,</span><span class="n">volume</span> <span class="o">=</span> <span class="bp">None</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s">&quot;&quot;</span><span class="p">,</span> <span class="n">volume</span><span class="o">=</span><span class="mf">1.0</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot; Create an empty model. &quot;&quot;&quot;</span>
         
         <span class="c"># The name that the model is referenced by (should be a String)</span>
@@ -110,14 +110,13 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">listOfParameters</span> <span class="o">=</span> <span class="n">OrderedDict</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">listOfSpecies</span>    <span class="o">=</span> <span class="n">OrderedDict</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">listOfReactions</span>  <span class="o">=</span> <span class="n">OrderedDict</span><span class="p">()</span>
-        
-        <span class="c"># A well mixed model has an optional volume parameter. </span>
-        <span class="c"># This should be a Parameter</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">volume</span> <span class="o">=</span> <span class="n">volume</span><span class="p">;</span>
 
         <span class="c"># This defines the unit system at work for all numbers in the model</span>
         <span class="c">#   It should be a logical error to leave this undefined, subclasses should set it</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">units</span> <span class="o">=</span> <span class="s">&quot;population&quot;</span>
+        
+        <span class="bp">self</span><span class="o">.</span><span class="n">volume</span> <span class="o">=</span> <span class="n">volume</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">add_parameter</span><span class="p">(</span><span class="n">Parameter</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s">&#39;vol&#39;</span><span class="p">,</span> <span class="n">expression</span><span class="o">=</span><span class="n">volume</span><span class="p">))</span>
         
         <span class="c"># Dict that holds flattended parameters and species for</span>
         <span class="c"># evaluation of expressions in the scope of the model.</span>
@@ -128,44 +127,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">resolve_parameters</span><span class="p">()</span>
         <span class="n">doc</span> <span class="o">=</span> <span class="n">StochMLDocument</span><span class="p">()</span><span class="o">.</span><span class="n">from_model</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">doc</span><span class="o">.</span><span class="n">to_string</span><span class="p">()</span>
-        </div>
-<div class="viewcode-block" id="Model.initialize"><a class="viewcode-back" href="../../gillespy.html#gillespy.gillespy.Model.initialize">[docs]</a>    <span class="k">def</span> <span class="nf">initialize</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">species_names</span><span class="p">,</span> <span class="n">species_initial_values</span><span class="p">,</span> <span class="n">parameter_names</span><span class="p">,</span>
-                   <span class="n">parameter_values</span><span class="p">,</span> <span class="n">volume</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Sets up the species and parameter names and values, as well as volume,</span>
-<span class="sd">        for a Model object.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">sys</span><span class="o">.</span><span class="n">stderr</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&quot;WARNING: this function is depricated&quot;</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">species_names</span>      <span class="o">=</span> <span class="n">species_names</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">species_initial</span>    <span class="o">=</span> <span class="n">species_initial_values</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">parameter_names</span>    <span class="o">=</span> <span class="n">parameter_names</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">parameter_values</span>   <span class="o">=</span> <span class="n">parameter_values</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">volume</span>             <span class="o">=</span> <span class="n">volume</span>
-        
-        <span class="c"># note: we are assuming here that all species values are POPULATION</span>
-        <span class="c"># and same for parameter values in terms of population. We would</span>
-        <span class="c"># have to convert otherwise.</span>
-        
-        <span class="bp">self</span><span class="o">.</span><span class="n">ParamCount</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">parameter_names</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">SpecCount</span>  <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">species_names</span><span class="p">)</span>
-        
-        <span class="c"># converts parameter and values to list of parameter objects</span>
-        <span class="c"># adds to model</span>
-        <span class="n">parameters</span> <span class="o">=</span> <span class="p">[]</span>
-        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">xrange</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ParamCount</span><span class="p">):</span>
-            <span class="n">parameters</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">Parameter</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">parameter_names</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> 
-                                        <span class="n">expression</span><span class="o">=</span><span class="n">parameter_values</span><span class="p">[</span><span class="n">i</span><span class="p">]))</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">add_parameter</span><span class="p">(</span><span class="n">parameters</span><span class="p">)</span>
-       
-        <span class="c"># same for species</span>
-        <span class="n">species</span> <span class="o">=</span> <span class="p">[]</span>
-        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">xrange</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">SpecCount</span><span class="p">):</span>
-            <span class="n">species</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">Species</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">species_names</span><span class="p">[</span><span class="n">i</span><span class="p">],</span>
-                                   <span class="n">initial_value</span> <span class="o">=</span> <span class="n">parameter_values</span><span class="p">[</span><span class="n">i</span><span class="p">]))</span>
-            
-        <span class="bp">self</span><span class="o">.</span><span class="n">add_species</span><span class="p">(</span><span class="n">species</span><span class="p">)</span>
-    
-</div>
+    </div>
 <div class="viewcode-block" id="Model.update_namespace"><a class="viewcode-back" href="../../gillespy.html#gillespy.gillespy.Model.update_namespace">[docs]</a>    <span class="k">def</span> <span class="nf">update_namespace</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot; Create a dict with flattened parameter and species objects. &quot;&quot;&quot;</span>
         <span class="k">for</span> <span class="n">param</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">listOfParameters</span><span class="p">:</span>
@@ -451,6 +413,13 @@
             <span class="c"># Case 3: X1, X2 -&gt; Y;</span>
                 <span class="n">propensity_function</span> <span class="o">+=</span> <span class="s">&quot;*&quot;</span><span class="o">+</span><span class="n">r</span>
 
+        <span class="c"># Set the volume dependency based on order.</span>
+        <span class="n">order</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">reactants</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">order</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
+            <span class="n">propensity_function</span> <span class="o">+=</span> <span class="s">&quot;/vol&quot;</span>
+        <span class="k">elif</span> <span class="n">order</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">propensity_function</span> <span class="o">+=</span> <span class="s">&quot;*vol&quot;</span>
+
         <span class="bp">self</span><span class="o">.</span><span class="n">propensity_function</span> <span class="o">=</span> <span class="n">propensity_function</span>
             </div>
 <div class="viewcode-block" id="Reaction.setType"><a class="viewcode-back" href="../../gillespy.html#gillespy.gillespy.Reaction.setType">[docs]</a>    <span class="k">def</span> <span class="nf">setType</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="nb">type</span><span class="p">):</span>
@@ -635,7 +604,7 @@
             <span class="n">name</span> <span class="o">=</span> <span class="n">px</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="s">&#39;Id&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">text</span>
             <span class="n">expr</span> <span class="o">=</span> <span class="n">px</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="s">&#39;Expression&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">text</span>
             <span class="k">if</span> <span class="n">name</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="s">&#39;volume&#39;</span><span class="p">:</span>
-                <span class="n">model</span><span class="o">.</span><span class="n">volume</span> <span class="o">=</span> <span class="n">Parameter</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">expression</span> <span class="o">=</span> <span class="n">expr</span><span class="p">)</span>
+                <span class="n">model</span><span class="o">.</span><span class="n">volume</span> <span class="o">=</span> <span class="n">expr</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="n">p</span> <span class="o">=</span> <span class="n">Parameter</span><span class="p">(</span><span class="n">name</span><span class="p">,</span><span class="n">expression</span><span class="o">=</span><span class="n">expr</span><span class="p">)</span>
                 <span class="c"># Try to evaluate the expression in the empty namespace </span>
@@ -1114,76 +1083,7 @@
 <span class="sd">    Here, as a test case, we run a simple two-state oscillator (Novak &amp; Tyson </span>
 <span class="sd">    2008) as an example of a stochastic reaction system.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-        
-    <span class="c"># =============================================</span>
-    <span class="c"># Define model species, initial values, parameters, and volume</span>
-    <span class="c"># =============================================    </span>
-    
-    <span class="c"># stochastic volume parameter, omega</span>
-    <span class="n">omega</span> <span class="o">=</span> <span class="mi">150</span>
-    
-    <span class="c"># parameter names consists of a list of strings    </span>
-    <span class="n">parameter_names</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;P&#39;</span><span class="p">,</span><span class="s">&#39;kt&#39;</span><span class="p">,</span><span class="s">&#39;kd&#39;</span><span class="p">,</span><span class="s">&#39;a0&#39;</span><span class="p">,</span><span class="s">&#39;a1&#39;</span><span class="p">,</span><span class="s">&#39;a2&#39;</span><span class="p">,</span><span class="s">&#39;kdx&#39;</span><span class="p">]</span>
-    
-    <span class="c"># Parameter values consists of a list or numpy array of floats.</span>
-    <span class="c"># These have been converted to be in population, rather than concentration</span>
-    <span class="c"># units. For example, a concentration unit of 0.5mol/(L*s) is multiplied </span>
-    <span class="c"># by a volume unit (omega), to get a population/s rate constant.</span>
-    <span class="n">parameter_values</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mf">2.</span><span class="p">,</span> <span class="mf">20.</span><span class="p">,</span> <span class="mf">1.</span><span class="p">,</span> <span class="mf">0.005</span><span class="p">,</span> <span class="mf">0.05</span><span class="p">,</span> <span class="mf">0.1</span><span class="p">,</span> <span class="mf">1.</span><span class="p">])</span>
-    
-    <span class="c"># Species names</span>
-    <span class="n">species_names</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;X&#39;</span><span class="p">,</span><span class="s">&#39;Y&#39;</span><span class="p">]</span>
-    
-    <span class="c"># Initial values of each species (concentration converted to pop.)</span>
-    <span class="n">species_initial</span> <span class="o">=</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span> <span class="mf">0.65609071</span><span class="p">,</span>  <span class="mf">0.85088331</span><span class="p">])</span><span class="o">*</span><span class="n">omega</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span>
-    
-    <span class="c"># To set up the model, first create an empty model object. Then, add </span>
-    <span class="c"># species and parameters as was set up above.</span>
-    <span class="n">tyson_model</span> <span class="o">=</span> <span class="n">Model</span><span class="p">(</span><span class="n">name</span> <span class="o">=</span> <span class="s">&quot;tyson-2-state&quot;</span><span class="p">)</span>
-    <span class="n">tyson_model</span><span class="o">.</span><span class="n">initialize</span><span class="p">(</span><span class="n">species_names</span><span class="p">,</span> <span class="n">species_initial</span><span class="p">,</span>
-                           <span class="n">parameter_names</span><span class="p">,</span> <span class="n">parameter_values</span><span class="p">,</span> <span class="n">omega</span><span class="p">)</span>
-    
-    
-    <span class="c"># =============================================  </span>
-    <span class="c"># Define the reactions within the model</span>
-    <span class="c"># =============================================  </span>
-    
-    <span class="c"># creation of X:</span>
-    <span class="n">rxn1</span> <span class="o">=</span> <span class="n">Reaction</span><span class="p">(</span><span class="n">name</span> <span class="o">=</span> <span class="s">&#39;X production&#39;</span><span class="p">,</span>
-                    <span class="n">reactants</span> <span class="o">=</span> <span class="p">{},</span>
-                    <span class="n">products</span> <span class="o">=</span> <span class="p">{</span><span class="s">&#39;X&#39;</span><span class="p">:</span><span class="mi">1</span><span class="p">},</span>
-                    <span class="n">propensity_function</span> <span class="o">=</span> <span class="s">&#39;150*1/(1+(Y*Y/((150*150))))&#39;</span><span class="p">)</span>
-    
-    <span class="c"># degradadation of X:</span>
-    <span class="n">rxn2</span> <span class="o">=</span> <span class="n">Reaction</span><span class="p">(</span><span class="n">name</span> <span class="o">=</span> <span class="s">&#39;X degradation&#39;</span><span class="p">,</span>
-                <span class="n">reactants</span> <span class="o">=</span> <span class="p">{</span><span class="s">&#39;X&#39;</span><span class="p">:</span><span class="mi">1</span><span class="p">},</span>
-                <span class="n">products</span> <span class="o">=</span> <span class="p">{},</span>
-                <span class="n">propensity_function</span> <span class="o">=</span> <span class="s">&#39;kdx*X&#39;</span><span class="p">)</span>
-    
-    <span class="c"># creation of Y:</span>
-    <span class="n">rxn3</span> <span class="o">=</span> <span class="n">Reaction</span><span class="p">(</span><span class="n">name</span> <span class="o">=</span> <span class="s">&#39;Y production&#39;</span><span class="p">,</span>
-                <span class="n">reactants</span> <span class="o">=</span> <span class="p">{},</span>
-                <span class="n">products</span> <span class="o">=</span> <span class="p">{</span><span class="s">&#39;Y&#39;</span><span class="p">:</span><span class="mi">1</span><span class="p">},</span>
-                <span class="n">propensity_function</span> <span class="o">=</span> <span class="s">&#39;X*kt&#39;</span><span class="p">)</span>
-    
-    <span class="c"># degradation of Y:</span>
-    <span class="n">rxn4</span> <span class="o">=</span> <span class="n">Reaction</span><span class="p">(</span><span class="n">name</span> <span class="o">=</span> <span class="s">&#39;Y degradation&#39;</span><span class="p">,</span>
-                <span class="n">reactants</span> <span class="o">=</span> <span class="p">{</span><span class="s">&#39;Y&#39;</span><span class="p">:</span><span class="mi">1</span><span class="p">},</span>
-                <span class="n">products</span> <span class="o">=</span> <span class="p">{},</span>
-                <span class="n">propensity_function</span> <span class="o">=</span> <span class="s">&#39;kd*Y&#39;</span><span class="p">)</span>
-        
-    <span class="c"># nonlinear Y term:</span>
-    <span class="n">rxn5</span> <span class="o">=</span> <span class="n">Reaction</span><span class="p">(</span><span class="n">name</span> <span class="o">=</span> <span class="s">&#39;Y nonlin&#39;</span><span class="p">,</span>
-                <span class="n">reactants</span> <span class="o">=</span> <span class="p">{</span><span class="s">&#39;Y&#39;</span><span class="p">:</span><span class="mi">1</span><span class="p">},</span>
-                <span class="n">products</span> <span class="o">=</span> <span class="p">{},</span>
-                <span class="n">propensity_function</span> <span class="o">=</span> <span class="s">&#39;Y/(a0 + a1*(Y/150)+a2*Y*Y/(150*150))&#39;</span><span class="p">)</span>
-    
-    <span class="n">reactions</span> <span class="o">=</span> <span class="p">[</span><span class="n">rxn1</span><span class="p">,</span><span class="n">rxn2</span><span class="p">,</span><span class="n">rxn3</span><span class="p">,</span><span class="n">rxn4</span><span class="p">,</span><span class="n">rxn5</span><span class="p">]</span>
-    <span class="n">tyson_model</span><span class="o">.</span><span class="n">add_reaction</span><span class="p">(</span><span class="n">reactions</span><span class="p">)</span>
-    <span class="c"># returns trajectories from the tyson model</span>
-    <span class="n">tyson_trajectories</span> <span class="o">=</span> <span class="n">simulate</span><span class="p">(</span><span class="n">tyson_model</span><span class="p">)</span>
-    
-    <span class="c"># plot just the first trajectory, 0, in both time and phase space:</span>
+
     <span class="kn">from</span> <span class="nn">matplotlib</span> <span class="kn">import</span> <span class="n">gridspec</span>
     
     <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mf">3.5</span><span class="o">*</span><span class="mi">2</span><span class="o">*</span><span class="mi">3</span><span class="o">/</span><span class="mi">4</span><span class="p">,</span><span class="mf">2.62</span><span class="o">*</span><span class="mi">3</span><span class="o">/</span><span class="mi">4</span><span class="p">))</span>

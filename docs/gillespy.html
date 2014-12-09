@@ -78,7 +78,7 @@ A. Hellander. Stand-alone GillesPy module work by J. Abel and B. Drawert.</p>
 
 <dl class="class">
 <dt id="gillespy.Model">
-<em class="property">class </em><tt class="descclassname">gillespy.</tt><tt class="descname">Model</tt><big>(</big><em>name=''</em>, <em>volume=None</em><big>)</big><a class="reference internal" href="_modules/gillespy.html#Model"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gillespy.Model" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><tt class="descclassname">gillespy.</tt><tt class="descname">Model</tt><big>(</big><em>name=''</em>, <em>volume=1.0</em><big>)</big><a class="reference internal" href="_modules/gillespy.html#Model"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gillespy.Model" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">object</span></tt></p>
 <p>Representation of a well mixed biochemical model. Contains reactions,
 parameters, species, etc.</p>
@@ -162,13 +162,6 @@ Species object, or as a list of Species objects.</p>
 <dt id="gillespy.Model.get_species">
 <tt class="descname">get_species</tt><big>(</big><em>sname</em><big>)</big><a class="reference internal" href="_modules/gillespy.html#Model.get_species"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gillespy.Model.get_species" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
-
-<dl class="method">
-<dt id="gillespy.Model.initialize">
-<tt class="descname">initialize</tt><big>(</big><em>species_names</em>, <em>species_initial_values</em>, <em>parameter_names</em>, <em>parameter_values</em>, <em>volume</em><big>)</big><a class="reference internal" href="_modules/gillespy.html#Model.initialize"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gillespy.Model.initialize" title="Permalink to this definition">¶</a></dt>
-<dd><p>Sets up the species and parameter names and values, as well as volume,
-for a Model object.</p>
-</dd></dl>
 
 <dl class="method">
 <dt id="gillespy.Model.resolve_parameters">
