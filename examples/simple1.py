@@ -4,111 +4,83 @@ import matplotlib.pyplot as plt
 
 import sys
 sys.path.append('../')
+
 import gillespy
 
 class Simple1(gillespy.Model):
     """
-    This simple example 
+    This is a simple example for mass-action degradation of species S.
     """
-    def __init__(self, parameter_values=None):
-        """
-        """
-        gillespy.Model.__init__(self, name="simple1")
-        # =============================================
-        # Define model species, initial values, parameters, and volume
-        # =============================================    
-        
-        # Parameters and species are already in population units
 
-        P = gillespy.Parameter(name='P', expression=2.0)
-        kt = gillespy.Parameter(name='kt', expression=20.0)
-        kd = gillespy.Parameter(name='kd', expression=1.0)
-        a0 = gillespy.Parameter(name='a0', expression=0.005)
-        a1 = gillespy.Parameter(name='a1', expression=0.05)
-        a2 = gillespy.Parameter(name='a2', expression=0.1)
-        kdx = gillespy.Parameter(name='kdx', expression=1.0)
-        vol = gillespy.Parameter(name='vol',expression=omega) # conversion
-        self.add_parameter([P, kt, kd, a0, a1, a2, kdx, vol])
+    def __init__(self, parameter_values=None):
+
+        # Initialize the model.
+        gillespy.Model.__init__(self, name="simple1")
+        
+        # Parameters
+        k1 = gillespy.Parameter(name='k1', expression=0.3)
+        self.add_parameter(k1)
         
         # Species
-        # Initial values of each species (concentration converted to pop.)
-        X = gillespy.Species(name='X', initial_value=int(0.65609071*omega))
-        Y = gillespy.Species(name='Y', initial_value=int(0.85088331*omega))
-        self.add_species([X, Y])
+        S = gillespy.Species(name='S', initial_value=100)
+        self.add_species(S)
         
-        # =============================================  
-        # Define the reactions within the model
-        # =============================================  
-        
-        # creation of X:
-        rxn1 = gillespy.Reaction(name = 'X production',
-                        reactants = {},
-                        products = {X:1},
-                        propensity_function = 'vol*1/(1+(Y*Y/((vol*vol))))')
-        
-        # degradadation of X:
-        rxn2 = gillespy.Reaction(name = 'X degradation',
-                    reactants = {X:1},
-                    products = {},
-                    rate = kdx)
-        
-        # creation of Y:
-        rxn3 = gillespy.Reaction(name = 'Y production',
-                    reactants = {X:1},
-                    products = {X:1, Y:1},
-                    rate = kt)
-        
-        # degradation of Y:
-        rxn4 = gillespy.Reaction(name = 'Y degradation',
-                    reactants = {Y:1},
-                    products = {},
-                    rate = kd)
-            
-        # nonlinear Y term:
-        rxn5 = gillespy.Reaction(name = 'Y nonlin',
-                    reactants = {Y:1},
-                    products = {},
-                    propensity_function = 'Y/(a0 + a1*(Y/vol)+a2*Y*Y/(vol*vol))')
-        
-        self.add_reaction([rxn1,rxn2,rxn3,rxn4,rxn5])
+        # Reactions
+        rxn1 = gillespy.Reaction(
+                name = 'S degradation',
+                reactants = {S:1},
+                products = {},
+                rate = k1 )
+        self.add_reaction(rxn1)
 
 
 
 if __name__ == '__main__':
 
-    tyson_model = Tyson2StateOscillator()
-
-    # =============================================
-    # Simulate the mode and return the trajectories 
-    # =============================================  
-    # To set up the model, first create an empty model object. Then, add
-    # species and parameters as was set up above.
-    tyson_trajectories = gillespy.StochKitSolver.simulate(tyson_model)
+    # Here, we create the model object.
+    # We could pass new parameter values to this model here if we wished.
+    simple_model = Simple1()
     
-    # =============================================  
-    # plot just the first trajectory, 0, in both time and phase space:
-    # =============================================  
+    # The model object is simulated with the StochKit solver, and 25 
+    # trajectories are returned.
+    num_trajectories = 250
+    simple_trajectories = gillespy.StochKitSolver.simulate(simple_model, 
+            number_of_trajectories = num_trajectories)
+    
+
+
+
+    # PLOTTING
+
+
+    # here, we will plot all trajectories with the mean overlaid
     from matplotlib import gridspec
     
-    plt.figure(figsize=(3.5*2,2.62))
-    gs = gridspec.GridSpec(1,2)
+    plt.figure(figsize=(3.5,2.62))
+    gs = gridspec.GridSpec(1,1)
     
     
     ax0 = plt.subplot(gs[0,0])
-    ax0.plot(tyson_trajectories[0][:,0], tyson_trajectories[0][:,1], 
-             label='X')
-    ax0.plot(tyson_trajectories[0][:,0], tyson_trajectories[0][:,2], 
-             label='Y')
+
+    # extract time values
+    time = np.array(simple_trajectories[0][:,0]) 
+
+    # extract just the trajectories for S into a numpy array
+    S_trajectories = np.array([simple_trajectories[i][:,1] for i in xrange(num_trajectories)]).T
+    
+    #plot individual trajectories
+    ax0.plot(time, S_trajectories, 'gray', alpha = 0.1)
+
+    #plot mean
+    ax0.plot(time, S_trajectories.mean(1), 'k--', label = "Mean S")
+    
+    #plot min-max
+    ax0.plot(time,S_trajectories.min(1), 'b--', label = "Minimum S")
+    ax0.plot(time,S_trajectories.max(1), 'r--', label = "Maximum S")
+
     ax0.legend()
     ax0.set_xlabel('Time')
-    ax0.set_ylabel('Species Count')
-    ax0.set_title('Time Series Oscillation')
-    
-    ax1 = plt.subplot(gs[0,1])
-    ax1.plot(tyson_trajectories[1][:,1], tyson_trajectories[0][:,2], 'k')
-    ax1.set_xlabel('X')
-    ax1.set_ylabel('Y')
-    ax1.set_title('Phase-Space Plot')
+    ax0.set_ylabel('Species S Count')
     
     plt.tight_layout()
     plt.show()
