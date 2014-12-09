@@ -47,7 +47,7 @@ class Model(object):
     
     """
     
-    def __init__(self,name=""):
+    def __init__(self, name="", volume=1.0):
         """ Create an empty model. """
         
         # The name that the model is referenced by (should be a String)
@@ -66,6 +66,9 @@ class Model(object):
         #   It should be a logical error to leave this undefined, subclasses should set it
         self.units = "population"
         
+        self.volume = volume
+        self.add_parameter(Parameter(name='vol', expression=volume))
+        
         # Dict that holds flattended parameters and species for
         # evaluation of expressions in the scope of the model.
         self.namespace = OrderedDict([])
@@ -75,44 +78,7 @@ class Model(object):
         self.resolve_parameters()
         doc = StochMLDocument().from_model(self)
         return doc.to_string()
-        
-    def initialize(self, species_names, species_initial_values, parameter_names,
-                   parameter_values):
-        """
-        Sets up the species and parameter names and values
-        for a Model object.
-        """
-        sys.stderr.write("WARNING: this function is depricated")
-        self.species_names      = species_names
-        self.species_initial    = species_initial_values
-        self.parameter_names    = parameter_names
-        self.parameter_values   = parameter_values
-
-        
-        # note: we are assuming here that all species values are POPULATION
-        # and same for parameter values in terms of population. We would
-        # have to convert otherwise.
-        
-        self.ParamCount = len(self.parameter_names)
-        self.SpecCount  = len(self.species_names)
-        
-        # converts parameter and values to list of parameter objects
-        # adds to model
-        parameters = []
-        for i in xrange(self.ParamCount):
-            parameters.append(Parameter(name=parameter_names[i], 
-                                        expression=parameter_values[i]))
-        self.add_parameter(parameters)
-       
-        # same for species
-        species = []
-        for i in xrange(self.SpecCount):
-            species.append(Species(name=species_names[i],
-                                   initial_value = parameter_values[i]))
-            
-        self.add_species(species)
     
-
     def update_namespace(self):
         """ Create a dict with flattened parameter and species objects. """
         for param in self.listOfParameters:
@@ -398,6 +364,13 @@ class Reaction():
             # Case 3: X1, X2 -> Y;
                 propensity_function += "*"+r
 
+        # Set the volume dependency based on order.
+        order = len(self.reactants)
+        if order == 2:
+            propensity_function += "/vol"
+        elif order == 0:
+            propensity_function += "*vol"
+
         self.propensity_function = propensity_function
             
     def setType(self,type):
@@ -581,8 +554,8 @@ class StochMLDocument():
         for px in root.iter('Parameter'):
             name = px.find('Id').text
             expr = px.find('Expression').text
-            if name.lower() == 'vol':
-                model.vol = Parameter(name, expression = expr)
+            if name.lower() == 'volume':
+                model.volume = expr
             else:
                 p = Parameter(name,expression=expr)
                 # Try to evaluate the expression in the empty namespace 

@@ -14,7 +14,8 @@ class Tyson2StateOscillator(gillespy.Model):
     def __init__(self, parameter_values=None):
         """
         """
-        gillespy.Model.__init__(self, name="tyson-2-state")
+        system_volume = 300 #system volume
+        gillespy.Model.__init__(self, name="tyson-2-state", volume=system_volume)
         # =============================================
         # Define model species, initial values, parameters, and volume
         # =============================================    
@@ -34,13 +35,12 @@ class Tyson2StateOscillator(gillespy.Model):
         a1 = gillespy.Parameter(name='a1', expression=0.05)
         a2 = gillespy.Parameter(name='a2', expression=0.1)
         kdx = gillespy.Parameter(name='kdx', expression=1.0)
-        vol = gillespy.Parameter(name='vol',expression=300)
-        self.add_parameter([P, kt, kd, a0, a1, a2, kdx, vol])
+        self.add_parameter([P, kt, kd, a0, a1, a2, kdx])
         
         # Species
         # Initial values of each species (concentration converted to pop.)
-        X = gillespy.Species(name='X', initial_value=int(0.65609071*300))
-        Y = gillespy.Species(name='Y', initial_value=int(0.85088331*300))
+        X = gillespy.Species(name='X', initial_value=int(0.65609071*system_volume))
+        Y = gillespy.Species(name='Y', initial_value=int(0.85088331*system_volume))
         self.add_species([X, Y])
         
         # =============================================  
@@ -97,7 +97,6 @@ if __name__ == '__main__':
     # =============================================  
     from matplotlib import gridspec
     
-    plt.figure(figsize=(3.5*2,2.62))
     gs = gridspec.GridSpec(1,2)
     
     

@@ -56,7 +56,6 @@ if __name__ == '__main__':
     # here, we will plot all trajectories with the mean overlaid
     from matplotlib import gridspec
     
-    plt.figure(figsize=(3.5,2.62))
     gs = gridspec.GridSpec(1,1)
     
     
