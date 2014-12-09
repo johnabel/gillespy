@@ -16,8 +16,4 @@ else
 fi
 export GILLESPYHOME=$MY_PATH
 export PYTHONPATH="$PYTHONPATH:$GILLESPYHOME"
-export C_INCLUDE_PATH=/usr/lib/openmpi/include
-#echo "GILLESPYHOME=$GILLESPYHOME"
-#echo "PYTHONPATH=$PYTHONPATH"
-export C_INCLUDE_PATH=/usr/lib/openmpi/include
 
