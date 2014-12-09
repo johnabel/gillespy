@@ -1,5 +1,5 @@
 from setuptools import setup
-from setuptool.command.install import install
+from setuptools.command.install import install
 import os
 
 class Install(install):
