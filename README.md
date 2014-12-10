@@ -8,13 +8,14 @@ GillesPy is part of the StochSS project, see http://www.stochss.org for more det
 
 GillesPy requires numpy, scipy, and matplotlib for proper functionality. Installation details for these packages can be found at http://scipy.org. 
 
-GillesPy does not install the StochKit or StochKitODE solvers, but requires them for stochastic simulation. Either StochKit  OR StochSS must be installed to provide these solvers.
+GillesPy does not install the StochKit or StochKitODE solvers, but requires them for stochastic simulation. Either StochKit  **OR** StochSS must be installed to provide these solvers.
 
 Installation instructions for StochKit: http://sourceforge.net/projects/stochkit/
 
+**OR**
+
 Installation instructions for StochSS:  http://iguana.cs.ucsb.edu/wordpress/?page_id=224
 
-Once these dependencies are satisfied, GillesPy may be installed.
 
 ##Installation
 
@@ -26,6 +27,8 @@ If StochSS or StochKit is installed, GillesPy must be pointed to the solver loca
 
 For StochSS, set the variable STOCHSS_HOME while in the SUDO environment. On a linux Ubuntu system, with StochSS 1.4.1 install in your home directory:
 ```
+  git clone https://github.com/JohnAbel/gillespy.git
+  cd gillespy
   sudo STOCHSS_HOME=$HOME/stochss.linux.1.4.1/ python setup.py install
 ```
 
@@ -33,7 +36,9 @@ Note: simply using export STOCHSS_HOME will not provide a SUDO environment varia
 
 If StochKit is installed, this process is similar, but instead set the environment variable STOCHKIT_HOME:
 ```
-sudo STOCHKIT_HOME=$HOME/StochKit2.0.10/ python setup.py install
+  git clone https://github.com/JohnAbel/gillespy.git
+  cd gillespy
+  sudo STOCHKIT_HOME=$HOME/StochKit2.0.10/ python setup.py install
 ```
 
 As of this time, if only StochKit is installed, the StochKitODE solver is inaccessible.
@@ -47,6 +52,8 @@ If StochSS or StochKit is installed, GillesPy must be pointed to the solver loca
 
 For StochSS, set the variable STOCHSS_HOME while in the SUDO environment. On OSX, if you have StochSS 1.4.1 installed in your Applications directory, then you would:
 ```
+  git clone https://github.com/JohnAbel/gillespy.git
+  cd gillespy
   sudo STOCHSS_HOME=/Applications/StochSS-1.4.1/StochSSserver.app/Contents/Resources/ python setup.py install
 ```
 
@@ -59,7 +66,9 @@ Note: simply using export STOCHSS_HOME will not provide a SUDO environment varia
 
 If StochKit is installed, this process is similar, but instead set the environment variable STOCHKIT_HOME:
 ```
-sudo STOCHKIT_HOME=/Applications/StochKit2.0.10/ python setup.py install
+  git clone https://github.com/JohnAbel/gillespy.git
+  cd gillespy
+  sudo STOCHKIT_HOME=/Applications/StochKit2.0.10/ python setup.py install
 ```
 
 As of this time, if only StochKit is installed, the StochKitODE solver is inaccessible.
