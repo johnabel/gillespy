@@ -1,14 +1,12 @@
 from setuptools import setup
 from setuptools.command.install import install
 import os
-import pdb
 
 class Install(install):
     def do_egg_install(self):
         success=False
         cmd = "echo 'from .gillespy import *' > gillespy/__init__.py"
         cmd += "\necho 'import os' >> gillespy/__init__.py"
-	pdb.set_trace()
         if os.environ.get('STOCHSS_HOME') is not None:
             cmd += "\necho 'os.environ[\'PATH\'] += os.pathsep + \"{0}\"' >> gillespy/__init__.py".format(os.environ['STOCHSS_HOME'])
             success=True
