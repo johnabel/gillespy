@@ -1,18 +1,20 @@
 from setuptools import setup
 from setuptools.command.install import install
 import os
+import pdb
 
 class Install(install):
     def do_egg_install(self):
-        cmd = "echo 'import os' > gillespy/__init__.py'"
-        if os.envion.get('STOCHSS_HOME') is not None:
-            cmd += "echo 'os.environ[\'PATH\'] += os.pathsep + {0}' > gillespy/__init__.py".format(os.environ['STOCHSS_HOME'])
-        if os.envion.get('STOCHKIT_HOME') is not None:
-            cmd += "echo 'os.environ[\'PATH\'] += os.pathsep + {0}' > gillespy/__init__.py".format(os.environ['STOCHKIT_HOME'])
-        if os.envion.get('STOCHKIT_ODE_HOME') is not None:
-            cmd += "echo 'os.environ[\'PATH\'] += os.pathsep + {0}' > gillespy/__init__.py".format(os.environ['STOCHKIT_ODE_HOME'])
+        cmd = "echo -e 'import os' >> gillespy/__init__.py"
+        if os.environ.get('STOCHSS_HOME') is not None:
+            cmd += "\necho -e 'os.environ[\'PATH\'] += os.pathsep + \'{0}\'' >> gillespy/__init__.py".format(os.environ['STOCHSS_HOME'])
+        if os.environ.get('STOCHKIT_HOME') is not None:
+            cmd += "\necho -e 'os.environ[\'PATH\'] += os.pathsep + \'{0}\'' >> gillespy/__init__.py".format(os.environ['STOCHKIT_HOME'])
+        if os.environ.get('STOCHKIT_ODE_HOME') is not None:
+            cmd += "\necho -e 'os.environ[\'PATH\'] += os.pathsep + \'{0}\'' >> gillespy/__init__.py".format(os.environ['STOCHKIT_ODE_HOME'])
         print cmd
         self.run_command(cmd)
+
         install.do_egg_install(self)
 
 
@@ -33,6 +35,8 @@ setup(name = "gillespy",
 
       url = "http://www.github.com/JohnAbel/GillesPy", # we don't really yet have one
 
-      download_url = "https://github.com/JohnAbel/GillesPy/tarball/master/"
+      download_url = "https://github.com/JohnAbel/GillesPy/tarball/master/",
+      
+      cmdclass = {'install':Install}
       
       )
