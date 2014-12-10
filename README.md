@@ -26,7 +26,7 @@ If StochSS or StochKit is installed, GillesPy must be pointed to the solver loca
 
 For StochSS, set the variable STOCHSS_HOME while in the SUDO environment. On a linux Ubuntu system, with StochSS 1.4.1 install in your home directory:
 ```
-  git clone https://github.com/JohnAbel/GillesPy.git
+  git clone https://github.com/JohnAbel/gillespy.git
   cd gillespy
   sudo STOCHSS_HOME=$HOME/stochss.linux.1.4.1/ python setup.py install
 ```
@@ -35,7 +35,7 @@ Note: simply using export STOCHSS_HOME will not provide a SUDO environment varia
 
 If StochKit is installed, this process is similar, but instead set the environment variable STOCHKIT_HOME:
 ```
-  git clone https://github.com/JohnAbel/GillesPy.git
+  git clone https://github.com/JohnAbel/gillespy.git
   cd gillespy
   sudo STOCHKIT_HOME=$HOME/StochKit2.0.10/ python setup.py install
 ```
@@ -51,7 +51,7 @@ If StochSS or StochKit is installed, GillesPy must be pointed to the solver loca
 
 For StochSS, set the variable STOCHSS_HOME while in the SUDO environment. On OSX, if you have StochSS 1.4.1 installed in your Applications directory, then you would:
 ```
-  git clone https://github.com/JohnAbel/GillesPy.git
+  git clone https://github.com/JohnAbel/gillespy.git
   cd gillespy
   sudo STOCHSS_HOME=/Applications/StochSS-1.4.1/StochSSserver.app/Contents/Resources/ python setup.py install
 ```
@@ -65,7 +65,7 @@ Note: simply using export STOCHSS_HOME will not provide a SUDO environment varia
 
 If StochKit is installed, this process is similar, but instead set the environment variable STOCHKIT_HOME:
 ```
-  git clone https://github.com/JohnAbel/GillesPy.git
+  git clone https://github.com/JohnAbel/gillespy.git
   cd gillespy
   sudo STOCHKIT_HOME=/Applications/StochKit2.0.10/ python setup.py install
 ```
