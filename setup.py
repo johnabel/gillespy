@@ -8,13 +8,13 @@ class Install(install):
         cmd = "echo 'from .gillespy import *' > gillespy/__init__.py"
         cmd += "\necho 'import os' >> gillespy/__init__.py"
         if os.environ.get('STOCHSS_HOME') is not None:
-            cmd += "\necho 'os.environ[\'PATH\'] += os.pathsep + \"{0}\"' >> gillespy/__init__.py".format(os.environ['STOCHSS_HOME'])
+            cmd += "\necho 'os.environ[\"PATH\"] += os.pathsep + \"{0}\"' >> gillespy/__init__.py".format(os.environ['STOCHSS_HOME'])
             success=True
         if os.environ.get('STOCHKIT_HOME') is not None:
-            cmd += "\necho 'os.environ[\'PATH\'] += os.pathsep + {0}' >> gillespy/__init__.py".format(os.environ['STOCHKIT_HOME'])
+            cmd += "\necho 'os.environ[\"PATH\"] += os.pathsep + {0}' >> gillespy/__init__.py".format(os.environ['STOCHKIT_HOME'])
             success=True
         if os.environ.get('STOCHKIT_ODE_HOME') is not None:
-            cmd += "\necho 'os.environ[\'PATH\'] += os.pathsep + {0}' >> gillespy/__init__.py".format(os.environ['STOCHKIT_ODE_HOME'])
+            cmd += "\necho 'os.environ[\"PATH\"] += os.pathsep + {0}' >> gillespy/__init__.py".format(os.environ['STOCHKIT_ODE_HOME'])
             success=True
         print cmd
         if success is False:
