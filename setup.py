@@ -7,6 +7,7 @@ class Install(install):
     def do_egg_install(self):
         success=False
         cmd = "echo -e 'import os' >> gillespy/__init__.py"
+        pdb.set_trace()
         if os.environ.get('STOCHSS_HOME') is not None:
             cmd += "\necho -e 'os.environ[\'PATH\'] += os.pathsep + \'{0}\'' >> gillespy/__init__.py".format(os.environ['STOCHSS_HOME'])
             success=True
@@ -18,8 +19,8 @@ class Install(install):
             success=True
         print cmd
         if not success:
-            raise Exception("StochKit not found, to simulation GillesPy models either StochSS or StochKit needs to be installed")
-        self.run_command(cmd)
+           raise Exception("StochKit not found, to simulate GillesPy models either StochKit solvers or StochSS must to be installed")
+        os.system(cmd)
 
         install.do_egg_install(self)
 
