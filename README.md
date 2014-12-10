@@ -1,11 +1,11 @@
 #GillesPy
-========
+
 GillesPy is a python interface to the StochKit stochastic simulation solvers. It provides 
 
 GillesPy is part of the StochSS project, see http://www.stochss.org for more details.
 
 ##Installation
-==============
+
 
 ### Ubuntu (with StochSS)
 
