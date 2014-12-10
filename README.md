@@ -1,41 +1,67 @@
 #GillesPy
 
-GillesPy is a python interface to the StochKit stochastic simulation solvers. It provides 
+GillesPy is a modeling toolkit for stochastic simulations for linux Ubuntu and OSX. It provides a python interface to the StochKit stochastic simulation solvers. It provides a simple interface for model construction, editing
 
 GillesPy is part of the StochSS project, see http://www.stochss.org for more details.
 
+## Dependencies
+
+GillesPy requires numpy, scipy, and matplotlib for proper functionality. Installation details for these packages can be found at http://scipy.org. 
+
+GillesPy does not install the StochKit or StochKitODE solvers, but requires them for stochastic simulation. Either StochKit  OR StochSS must be installed to provide these solvers.
+Installation instructions for StochKit: http://sourceforge.net/projects/stochkit/
+Installation instructions for StochSS:  http://iguana.cs.ucsb.edu/wordpress/?page_id=224
+
+Once these dependencies are satisfied, GillesPy may be installed.
+
 ##Installation
 
+Installation instructions are provided for linux Ubuntu and OSX.
 
-### Ubuntu (with StochSS)
+##### Ubuntu
 
-If you have StochSS installed, set the environment variable STOCHSS_HOME to the location.  Then run 'sudo python setup.py install'.
+If StochSS or StochKit is installed, GillesPy must be pointed to the solver locations. This is done during the installation, through setting a SUDO environment variable depending on whether you have StochSS or StochKit.
 
-On a linux Ubuntu system, with StochSS 1.4.1 install in your home directory:
+For StochSS, set the variable STOCHSS_HOME while in the SUDO environment. On a linux Ubuntu system, with StochSS 1.4.1 install in your home directory:
 ```
-  export STOCHSS_HOME=$HOME/stochss.linux.1.4.1/
-  sudo python setup.py install
+  sudo STOCHSS_HOME=$HOME/stochss.linux.1.4.1/ python setup.py install
 ```
 
-### Ubuntu (without StochSS)
+Note: simply using export STOCHSS_HOME will not provide a SUDO environment variable.
+
+If StochKit is installed, this process is similar, but instead set the environment variable STOCHKIT_HOME:
+```
+sudo STOCHKIT_HOME=$HOME/StochKit2.0.10/ python setup.py install
+```
+
+As of this time, if only StochKit is installed, the StochKitODE solver is inaccessible.
+```
+  TODO: Provide a way to install StochKitODE.
+```
+
+
+##### OSX
+If StochSS or StochKit is installed, GillesPy must be pointed to the solver locations. This is done during the installation, through setting a SUDO environment variable depending on whether you have StochSS or StochKit.
+
+For StochSS, set the variable STOCHSS_HOME while in the SUDO environment. On OSX, if you have StochSS 1.4.1 installed in your Applications directory, then you would:
+```
+  sudo STOCHSS_HOME=/Applications/StochSS-1.4.1/StochSSserver.app/Contents/Resources/ python setup.py install
+```
+
+##### OSX (without StochSS)
 
 If you do not have StochSS installed, you will need to download StochKit (http://sourceforge.net/projects/stochkit/) and the StochKit-ODE package from StochSS.
 Then set the environement variables STOCHKIT_HOME and STOCHKIT_ODE_HOME before you run the setup.py script as above.
 
-### OSX (with StochSS)
+Note: simply using export STOCHSS_HOME will not provide a SUDO environment variable.
 
-For example (on OSX), if you have StochSS 1.4.1 installed in your Applications directory, then you would:
+If StochKit is installed, this process is similar, but instead set the environment variable STOCHKIT_HOME:
 ```
-  export STOCHSS_HOME=/Applications/StochSS-1.4.1/StochSSserver.app/Contents/Resources/
-  sudo python setup.py install
+sudo STOCHKIT_HOME=/Applications/StochKit2.0.10/ python setup.py install
 ```
 
-### OSX (without StochSS)
-
-If you do not have StochSS installed, you will need to download StochKit (http://sourceforge.net/projects/stochkit/) and the StochKit-ODE package from StochSS.
-Then set the environement variables STOCHKIT_HOME and STOCHKIT_ODE_HOME before you run the setup.py script as above.
-
-If you want to simulation GillesPy models deterministically, you need to download the ode package from StochSS
+As of this time, if only StochKit is installed, the StochKitODE solver is inaccessible.
 ```
-  TODO: complete instructions on how to do this
+  TODO: Provide a way to install StochKitODE.
 ```
+
