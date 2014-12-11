@@ -4,6 +4,7 @@ from setuptools.command.install import install
 import setuptools.command.bdist_egg
 
 import subprocess
+import os
 
 SETUP_DIR = os.path.dirname(os.path.abspath(__file__))
 
