@@ -2,7 +2,7 @@ from setuptools import setup
 from setuptools.command.install import install
 import setuptools.command.bdist_egg
 
-import os
+import subprocess
 
 class GillesPyBdistEgg(setuptools.command.bdist_egg):
     def run(self):
@@ -30,8 +30,14 @@ class GillesPyInstall(install):
         if success is False:
            raise Exception("StochKit not found, to simulate GillesPy models either StochKit or StochSS must to be installed")
         print cmd        
-        os.system(cmd)
-        install.do_egg_install(self)
+
+        try:
+            subprocess.check_call(cmd)
+        except (subprocess.CalledProcessError, OSError):
+            log.error('Problems setting path to solvers in GillesPy')
+            raise SystemExit
+
+        install.run(self)
 
 
 
