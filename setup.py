@@ -3,6 +3,7 @@ from setuptools.command.develop import develop
 from setuptools.command.install import install
 from setuptools.command.bdist_egg import bdist_egg
 from setuptools.command.easy_install import easy_install
+import subprocess
 import os
 
 SETUP_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -15,8 +16,7 @@ def stoch_path(command_subclass):
     orig_run = command_subclass.run
     
     def modified_run(self):
-        print "It worked."
-        
+      
         success=False
         cmd = "echo 'from .gillespy import *' > {0}/gillespy/__init__.py".format(SETUP_DIR)
         cmd += "\necho 'import os' >> {0}/gillespy/__init__.py".format(SETUP_DIR)
@@ -33,7 +33,14 @@ def stoch_path(command_subclass):
         print cmd
         if success is False:
            raise Exception("StochKit not found, to simulate GillesPy models either StochKit solvers or StochSS must to be installed")
-           
+        
+        try:
+            subprocess.check_call(cmd,shell=True)
+        except(subprocess.CalledProcessError,OSError) as e:
+            print "It didn't work {0}".format(e)
+            raise SystemExit
+            
+                
         orig_run(self)
         print str(orig_run)
     command_subclass.run = modified_run
