@@ -38,10 +38,7 @@ def stoch_path(command_subclass):
         except(subprocess.CalledProcessError,OSError) as e:
             print "It didn't work {0}".format(e)
             raise SystemExit
-            
-                
         orig_run(self)
-        print str(orig_run)
     command_subclass.run = modified_run
     return command_subclass
 

@@ -63,8 +63,8 @@ A. Hellander. Stand-alone GillesPy module work by J. Abel and B. Drawert.</p>
 <em class="property">class </em><tt class="descclassname">gillespy.</tt><tt class="descname">GillesPySolver</tt><a class="reference internal" href="_modules/gillespy.html#GillesPySolver"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gillespy.GillesPySolver" title="Permalink to this definition">¶</a></dt>
 <dd><p>abstract class for simulation methods</p>
 <dl class="classmethod">
-<dt id="gillespy.GillesPySolver.simulate">
-<em class="property">classmethod </em><tt class="descname">simulate</tt><big>(</big><em>model</em>, <em>t=20</em>, <em>number_of_trajectories=10</em>, <em>increment=0.05</em>, <em>seed=None</em>, <em>stochkit_home=None</em>, <em>algorithm=None</em>, <em>job_id=None</em><big>)</big><a class="reference internal" href="_modules/gillespy.html#GillesPySolver.simulate"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gillespy.GillesPySolver.simulate" title="Permalink to this definition">¶</a></dt>
+<dt id="gillespy.GillesPySolver.run">
+<em class="property">classmethod </em><tt class="descname">run</tt><big>(</big><em>model</em>, <em>t=20</em>, <em>number_of_trajectories=10</em>, <em>increment=0.05</em>, <em>seed=None</em>, <em>stochkit_home=None</em>, <em>algorithm=None</em>, <em>job_id=None</em><big>)</big><a class="reference internal" href="_modules/gillespy.html#GillesPySolver.run"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gillespy.GillesPySolver.run" title="Permalink to this definition">¶</a></dt>
 <dd><p>Call out and run the solver. Collect the results.</p>
 </dd></dl>
 
@@ -314,8 +314,8 @@ Matlab V &gt; 7.3 uses HDF5 as it&#8217;s base format for .mat files.</p>
 <dd><p>Bases: <a class="reference internal" href="#gillespy.GillesPySolver" title="gillespy.GillesPySolver"><tt class="xref py py-class docutils literal"><span class="pre">gillespy.GillesPySolver</span></tt></a></p>
 <p>Solver class to simulate Stochasticly with StockKit.</p>
 <dl class="classmethod">
-<dt id="gillespy.StochKitODESolver.simulate">
-<em class="property">classmethod </em><tt class="descname">simulate</tt><big>(</big><em>model</em>, <em>t=20</em>, <em>number_of_trajectories=10</em>, <em>increment=0.05</em>, <em>seed=None</em>, <em>stochkit_home=None</em>, <em>algorithm='stochkit_ode.py'</em>, <em>job_id=None</em><big>)</big><a class="reference internal" href="_modules/gillespy.html#StochKitODESolver.simulate"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gillespy.StochKitODESolver.simulate" title="Permalink to this definition">¶</a></dt>
+<dt id="gillespy.StochKitODESolver.run">
+<em class="property">classmethod </em><tt class="descname">run</tt><big>(</big><em>model</em>, <em>t=20</em>, <em>number_of_trajectories=10</em>, <em>increment=0.05</em>, <em>seed=None</em>, <em>stochkit_home=None</em>, <em>algorithm='stochkit_ode.py'</em>, <em>job_id=None</em><big>)</big><a class="reference internal" href="_modules/gillespy.html#StochKitODESolver.run"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gillespy.StochKitODESolver.run" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 </dd></dl>
@@ -343,8 +343,8 @@ working in a Python environment.</p>
 <dd><p>Bases: <a class="reference internal" href="#gillespy.GillesPySolver" title="gillespy.GillesPySolver"><tt class="xref py py-class docutils literal"><span class="pre">gillespy.GillesPySolver</span></tt></a></p>
 <p>Solver class to simulate Stochasticly with StockKit.</p>
 <dl class="classmethod">
-<dt id="gillespy.StochKitSolver.simulate">
-<em class="property">classmethod </em><tt class="descname">simulate</tt><big>(</big><em>model</em>, <em>t=20</em>, <em>number_of_trajectories=10</em>, <em>increment=0.05</em>, <em>seed=None</em>, <em>stochkit_home=None</em>, <em>algorithm='ssa'</em>, <em>job_id=None</em><big>)</big><a class="reference internal" href="_modules/gillespy.html#StochKitSolver.simulate"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gillespy.StochKitSolver.simulate" title="Permalink to this definition">¶</a></dt>
+<dt id="gillespy.StochKitSolver.run">
+<em class="property">classmethod </em><tt class="descname">run</tt><big>(</big><em>model</em>, <em>t=20</em>, <em>number_of_trajectories=10</em>, <em>increment=0.05</em>, <em>seed=None</em>, <em>stochkit_home=None</em>, <em>algorithm='ssa'</em>, <em>job_id=None</em><big>)</big><a class="reference internal" href="_modules/gillespy.html#StochKitSolver.run"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gillespy.StochKitSolver.run" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 </dd></dl>
