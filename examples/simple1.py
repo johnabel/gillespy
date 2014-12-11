@@ -44,7 +44,7 @@ if __name__ == '__main__':
     # The model object is simulated with the StochKit solver, and 25 
     # trajectories are returned.
     num_trajectories = 250
-    simple_trajectories = gillespy.StochKitSolver.simulate(simple_model, 
+    simple_trajectories = gillespy.StochKitSolver.run(simple_model, 
             number_of_trajectories = num_trajectories)
     
 

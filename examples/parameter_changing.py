@@ -74,9 +74,9 @@ if __name__ == '__main__':
     num_trajectories = 100
 
     # Let's simulate for both parameter sets, and compare the results
-    set1_trajectories = gillespy.StochKitSolver.simulate(set1_model, 
+    set1_trajectories = gillespy.StochKitSolver.run(set1_model, 
             number_of_trajectories = num_trajectories)
-    set2_trajectories = gillespy.StochKitSolver.simulate(set2_model,
+    set2_trajectories = gillespy.StochKitSolver.run(set2_model,
             number_of_trajectories = num_trajectories)
 
     # Done! That was simple.

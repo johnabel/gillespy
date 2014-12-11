@@ -860,7 +860,7 @@ class GillesPySolver():
     ''' abstract class for simulation methods '''
 
     @classmethod
-    def simulate(cls, model, t=20, number_of_trajectories=10,
+    def run(cls, model, t=20, number_of_trajectories=10,
             increment=0.05, seed=None, stochkit_home=None, algorithm=None,
             job_id=None):
         """ 
@@ -998,20 +998,20 @@ class StochKitSolver(GillesPySolver):
     ''' Solver class to simulate Stochasticly with StockKit. '''
     
     @classmethod
-    def simulate(cls, model, t=20, number_of_trajectories=10,
+    def run(cls, model, t=20, number_of_trajectories=10,
             increment=0.05, seed=None, stochkit_home=None, algorithm='ssa',
             job_id=None):
-        return GillesPySolver.simulate(model,t, number_of_trajectories, increment, seed, stochkit_home, algorithm, job_id)
+        return GillesPySolver.run(model,t, number_of_trajectories, increment, seed, stochkit_home, algorithm, job_id)
 
 
 class StochKitODESolver(GillesPySolver):
     ''' Solver class to simulate Stochasticly with StockKit. '''
     
     @classmethod
-    def simulate(cls, model, t=20, number_of_trajectories=10,
+    def run(cls, model, t=20, number_of_trajectories=10,
             increment=0.05, seed=None, stochkit_home=None, algorithm='stochkit_ode.py',
             job_id=None):
-        return GillesPySolver.simulate(model,t, number_of_trajectories, increment, seed, stochkit_home, algorithm, job_id)
+        return GillesPySolver.run(model,t, number_of_trajectories, increment, seed, stochkit_home, algorithm, job_id)
 
 
 # Exceptions
