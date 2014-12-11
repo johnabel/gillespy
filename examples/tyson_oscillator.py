@@ -90,7 +90,7 @@ if __name__ == '__main__':
     # =============================================  
     # To set up the model, first create an empty model object. Then, add
     # species and parameters as was set up above.
-    tyson_trajectories = gillespy.StochKitSolver.run(tyson_model)
+    tyson_trajectories = gillespy.StochKitSolver.simulate(tyson_model)
     
     # =============================================  
     # plot just the first trajectory, 0, in both time and phase space:

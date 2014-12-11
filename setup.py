@@ -1,10 +1,7 @@
 from setuptools import setup
-import setuptools
 from setuptools.command.install import install
-import setuptools.command.bdist_egg
-
-import subprocess
 import os
+import subprocess
 
 SETUP_DIR = os.path.dirname(os.path.abspath(__file__))
 
@@ -20,8 +17,6 @@ class Do_build(distutils.command.build):
 class Install(install):
     sub_commands = distutils.command.install.sub_commands + [('build_gillespy', None)]
 
-
-
 class GillesPyBuild(setuptools.Command):
     description = 'Configure GillesPy to find solvers'
 
@@ -34,7 +29,7 @@ class GillesPyBuild(setuptools.Command):
         pass
 
     def run(self):
-        print "Install.do_egg_install()"
+        print "GillesPyBuild.run()"
         success=False
         cmd = "echo 'from .gillespy import *' > gillespy/__init__.py"
         cmd += "\necho 'import os' >> gillespy/__init__.py"
@@ -48,15 +43,16 @@ class GillesPyBuild(setuptools.Command):
         if os.environ.get('STOCHKIT_ODE_HOME') is not None:
             cmd += "\necho 'os.environ[\"PATH\"] += os.pathsep + \"{0}\"' >> gillespy/__init__.py".format(os.environ['STOCHKIT_ODE_HOME'])
             success=True
-        if success is False:
-           raise Exception("StochKit not found, to simulate GillesPy models either StochKit or StochSS must to be installed")
-        print cmd        
-
+        print cmd
         try:
             subprocess.check_call(cmd)
         except (subprocess.CalledProcessError, OSError):
             log.error('Problems setting path to solvers in GillesPy')
             raise SystemExit
+        if success is False:
+           raise Exception("StochKit not found, to simulate GillesPy models either StochKit solvers or StochSS must to be installed")
+        
+
 
 
 setup(name = "gillespy",
