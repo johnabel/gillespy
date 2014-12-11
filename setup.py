@@ -5,7 +5,7 @@ from setuptools.command.bdist_egg import bdist_egg
 from setuptools.command.easy_install import easy_install
 import os
 
-
+SETUP_DIR = os.path.dirname(os.path.abspath(__file__))
 
 def stoch_path(command_subclass):
     """
@@ -18,17 +18,17 @@ def stoch_path(command_subclass):
         print "It worked."
         
         success=False
-        cmd = "echo 'from .gillespy import *' > gillespy/__init__.py"
-        cmd += "\necho 'import os' >> gillespy/__init__.py"
+        cmd = "echo 'from .gillespy import *' > {0}/gillespy/__init__.py".format(SETUP_DIR)
+        cmd += "\necho 'import os' >> {0}/gillespy/__init__.py".format(SETUP_DIR)
         if os.environ.get('STOCHSS_HOME') is not None:
-            cmd += "\necho 'os.environ[\"PATH\"] += os.pathsep + \"{0}/StochKit/\"' >> gillespy/__init__.py".format(os.environ['STOCHSS_HOME'])
-            cmd += "\necho 'os.environ[\"PATH\"] += os.pathsep + \"{0}/ode/\"' >> gillespy/__init__.py".format(os.environ['STOCHSS_HOME'])            
+            cmd += "\necho 'os.environ[\"PATH\"] += os.pathsep + \"{0}/StochKit/\"' >> {1}/gillespy/__init__.py".format(os.environ['STOCHSS_HOME'],SETUP_DIR)
+            cmd += "\necho 'os.environ[\"PATH\"] += os.pathsep + \"{0}/ode/\"' >> {1}/gillespy/__init__.py".format(os.environ['STOCHSS_HOME'],SETUP_DIR)            
             success=True
         if os.environ.get('STOCHKIT_HOME') is not None:
-            cmd += "\necho 'os.environ[\"PATH\"] += os.pathsep + \"{0}\"' >> gillespy/__init__.py".format(os.environ['STOCHKIT_HOME'])
+            cmd += "\necho 'os.environ[\"PATH\"] += os.pathsep + \"{0}\"' >> {1}/gillespy/__init__.py".format(os.environ['STOCHKIT_HOME'],SETUP_DIR)
             success=True
         if os.environ.get('STOCHKIT_ODE_HOME') is not None:
-            cmd += "\necho 'os.environ[\"PATH\"] += os.pathsep + \"{0}\"' >> gillespy/__init__.py".format(os.environ['STOCHKIT_ODE_HOME'])
+            cmd += "\necho 'os.environ[\"PATH\"] += os.pathsep + \"{0}\"' >> {1}/gillespy/__init__.py".format(os.environ['STOCHKIT_ODE_HOME'],SETUP_DIR)
             success=True
         print cmd
         if success is False:
