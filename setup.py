@@ -16,10 +16,12 @@ SETUP_DIR = os.path.dirname(os.path.abspath(__file__))
 
 class Install(install):
     def do_egg_install(self):
+        print "Install.do_egg_install"
         self.run_command('build_gillespy')
         install.do_egg_install(self)
 
     def run(self):
+        print "Install.run"
         self.run_command('build_gillespy')
         install.run(self)
 
