@@ -2,8 +2,9 @@ from setuptools import setup
 from setuptools.command.install import install
 import os
 
-class Install(install):
-    def do_egg_install(self):
+class GillesPyInstall(install):
+    #def do_egg_install(self):
+    def run(self):
         print "Install.do_egg_install()"
         success=False
         cmd = "echo 'from .gillespy import *' > gillespy/__init__.py"
@@ -44,6 +45,6 @@ setup(name = "gillespy",
 
       download_url = "https://github.com/JohnAbel/GillesPy/tarball/master/",
       
-      cmdclass = {'install':Install}
+      cmdclass = {'install':GillesPyInstall}
       
       )
