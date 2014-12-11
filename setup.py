@@ -19,6 +19,10 @@ class Install(install):
         self.run_command('build_gillespy')
         install.do_egg_install(self)
 
+    def run(self):
+        self.run_command('build_gillespy')
+        install.run(self)
+
 class GillesPyBuild(setuptools.Command):
     description = 'Configure GillesPy to find solvers'
 
