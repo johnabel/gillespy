@@ -4,6 +4,7 @@ import os
 
 class Install(install):
     def do_egg_install(self):
+        print "Install.do_egg_install()"
         success=False
         cmd = "echo 'from .gillespy import *' > gillespy/__init__.py"
         cmd += "\necho 'import os' >> gillespy/__init__.py"
@@ -19,7 +20,7 @@ class Install(install):
             success=True
         if success is False:
            raise Exception("StochKit not found, to simulate GillesPy models either StochKit or StochSS must to be installed")
-        
+        print cmd        
         os.system(cmd)
         install.do_egg_install(self)
 
