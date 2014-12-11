@@ -19,6 +19,16 @@ class Do_build(distutils.command.build):
 
 
 class GillesPyBuild(setuptools.Command):
+    description = 'Configure GillesPy to find solvers'
+
+    user_options = []
+
+    def initialize_options(self):
+        pass
+
+    def finalize_options(self):
+        pass
+
     def run(self):
         print "Install.do_egg_install()"
         success=False
@@ -43,9 +53,6 @@ class GillesPyBuild(setuptools.Command):
         except (subprocess.CalledProcessError, OSError):
             log.error('Problems setting path to solvers in GillesPy')
             raise SystemExit
-
-        install.run(self)
-
 
 
 setup(name = "gillespy",
