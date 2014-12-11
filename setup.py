@@ -45,6 +45,9 @@ setup(name = "gillespy",
 
       download_url = "https://github.com/JohnAbel/GillesPy/tarball/master/",
       
-      cmdclass = {'install':GillesPyInstall}
+      cmdclass = {
+         'install':GillesPyInstall,
+         'bdist_egg':GillesPyInstall,
+      }
       
       )
