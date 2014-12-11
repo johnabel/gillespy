@@ -1,17 +1,23 @@
 from setuptools import setup
+import setuptools
 from setuptools.command.install import install
 import setuptools.command.bdist_egg
 
 import subprocess
 
-class GillesPyBdistEgg(setuptools.command.bdist_egg):
+SETUP_DIR = os.path.dirname(os.path.abspath(__file__))
+
+
+class Do_bdist_egg(setuptools.command.bdist_egg):
     def run(self):
-        self.run_command('install')
+        self.run_command('build_gillespy')
         setuptools.command.bdist_egg.run(self)
 
+class Do_build(distutils.command.build):
+    sub_commands = _build.sub_commands + [('build_gillespy', None)]
 
-class GillesPyInstall(install):
-    #def do_egg_install(self):
+
+class GillesPyBuild(setuptools.Command):
     def run(self):
         print "Install.do_egg_install()"
         success=False
@@ -60,8 +66,9 @@ setup(name = "gillespy",
       download_url = "https://github.com/JohnAbel/GillesPy/tarball/master/",
       
       cmdclass = {
-         'install':GillesPyInstall,
-         'bdist_egg':GillesPyBdistEgg,
+         'build' : Do_build,
+         'bdist_egg' : Do_bdist_egg,
+         'build_gillespy': GillesPyBuild,
       }
       
       )
