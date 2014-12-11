@@ -38,7 +38,7 @@ If StochKit is installed, this process is similar, but instead set the environme
 ```
   git clone https://github.com/JohnAbel/gillespy.git
   cd gillespy
-  sudo STOCHKIT_HOME=$HOME/ python setup.py install
+  sudo STOCHKIT_HOME=$HOME/StochKit2.10.0/ python setup.py install
 ```
 
 As of this time, if only StochKit is installed, the StochKitODE solver is inaccessible.
@@ -68,7 +68,7 @@ If StochKit is installed, this process is similar, but instead set the environme
 ```
   git clone https://github.com/JohnAbel/gillespy.git
   cd gillespy
-  sudo STOCHKIT_HOME=/Applications/ python setup.py install
+  sudo STOCHKIT_HOME=/Applications/StochKit2.10.0/ python setup.py install
 ```
 
 As of this time, if only StochKit is installed, the StochKitODE solver is inaccessible.
