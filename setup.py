@@ -1,6 +1,14 @@
 from setuptools import setup
 from setuptools.command.install import install
+import setuptools.command.bdist_egg
+
 import os
+
+class GillesPyBdistEgg(setuptools.command.bdist_egg):
+    def run(self):
+        self.run_command('install')
+        setuptools.command.bdist_egg.run(self)
+
 
 class GillesPyInstall(install):
     #def do_egg_install(self):
@@ -47,7 +55,7 @@ setup(name = "gillespy",
       
       cmdclass = {
          'install':GillesPyInstall,
-         'bdist_egg':GillesPyInstall,
+         'bdist_egg':GillesPyBdistEgg,
       }
       
       )
