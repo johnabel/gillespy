@@ -15,7 +15,7 @@ class Do_bdist_egg(setuptools.command.bdist_egg):
         setuptools.command.bdist_egg.run(self)
 
 class Do_build(distutils.command.build):
-    sub_commands = _build.sub_commands + [('build_gillespy', None)]
+    sub_commands = distutils.command.build.sub_commands + [('build_gillespy', None)]
 
 
 class GillesPyBuild(setuptools.Command):
