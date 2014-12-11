@@ -1,22 +1,23 @@
 import setuptools
 from setuptools import setup
 from setuptools.command.install import install
+import setuptools.command.bdist_egg
 import os
+import sys
 import subprocess
 
 SETUP_DIR = os.path.dirname(os.path.abspath(__file__))
 
 
-class Do_bdist_egg(setuptools.command.bdist_egg):
-    def run(self):
-        self.run_command('build_gillespy')
-        setuptools.command.bdist_egg.run(self)
-
-class Do_build(distutils.command.build):
-    sub_commands = distutils.command.build.sub_commands + [('build_gillespy', None)]
+#class Do_bdist_egg(setuptools.command.bdist_egg):
+#    def run(self):
+#        self.run_command('build_gillespy')
+#        setuptools.command.bdist_egg.run(self)
 
 class Install(install):
-    sub_commands = distutils.command.install.sub_commands + [('build_gillespy', None)]
+    def do_egg_install(self):
+        self.run_command('build_gillespy')
+        install.do_egg_install(self)
 
 class GillesPyBuild(setuptools.Command):
     description = 'Configure GillesPy to find solvers'
@@ -46,9 +47,9 @@ class GillesPyBuild(setuptools.Command):
             success=True
         print cmd
         try:
-            subprocess.check_call(cmd)
-        except (subprocess.CalledProcessError, OSError):
-            log.error('Problems setting path to solvers in GillesPy')
+            subprocess.check_call(cmd, shell=True)
+        except (subprocess.CalledProcessError, OSError) as e:
+            sys.stderr.write('Problems setting path to solvers in GillesPy: {0}'.format(e))
             raise SystemExit
         if success is False:
            raise Exception("StochKit not found, to simulate GillesPy models either StochKit solvers or StochSS must to be installed")
@@ -75,8 +76,8 @@ setup(name = "gillespy",
       download_url = "https://github.com/JohnAbel/GillesPy/tarball/master/",
       
       cmdclass = {
-         'build' : Do_build,
-         'bdist_egg' : Do_bdist_egg,
+         #'build' : Do_build,
+         #'bdist_egg' : Do_bdist_egg,
          'build_gillespy': GillesPyBuild,
          'install':Install
       }
