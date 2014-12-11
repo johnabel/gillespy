@@ -12,12 +12,11 @@ class Install(install):
             cmd += "\necho 'os.environ[\'PATH\'] += os.pathsep + \"{0}/ode/\"' >> gillespy/__init__.py".format(os.environ['STOCHSS_HOME'])
             success=True
         if os.environ.get('STOCHKIT_HOME') is not None:
-            cmd += "\necho 'os.environ[\'PATH\'] += os.pathsep + {0}' >> gillespy/__init__.py".format(os.environ['STOCHKIT_HOME'])
+            cmd += "\necho 'os.environ[\"PATH\"] += os.pathsep + \"{0}\"' >> gillespy/__init__.py".format(os.environ['STOCHKIT_HOME'])
             success=True
         if os.environ.get('STOCHKIT_ODE_HOME') is not None:
-            cmd += "\necho 'os.environ[\'PATH\'] += os.pathsep + {0}' >> gillespy/__init__.py".format(os.environ['STOCHKIT_ODE_HOME'])
+            cmd += "\necho 'os.environ[\"PATH\"] += os.pathsep + \"{0}\"' >> gillespy/__init__.py".format(os.environ['STOCHKIT_ODE_HOME'])
             success=True
-        print cmd
         if success is False:
            raise Exception("StochKit not found, to simulate GillesPy models either StochKit or StochSS must to be installed")
         

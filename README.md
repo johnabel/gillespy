@@ -8,13 +8,14 @@ GillesPy is part of the StochSS project, see http://www.stochss.org for more det
 
 GillesPy requires numpy, scipy, and matplotlib for proper functionality. Installation details for these packages can be found at http://scipy.org. 
 
-GillesPy does not install the StochKit or StochKitODE solvers, but requires them for stochastic simulation. Either StochKit  OR StochSS must be installed to provide these solvers.
+GillesPy does not install the StochKit or StochKitODE solvers, but requires them for stochastic simulation. Either StochKit  **OR** StochSS must be installed to provide these solvers.
 
 Installation instructions for StochKit: http://sourceforge.net/projects/stochkit/
 
+**OR**
+
 Installation instructions for StochSS:  http://iguana.cs.ucsb.edu/wordpress/?page_id=224
 
-Once these dependencies are satisfied, GillesPy may be installed.
 
 ##Installation
 
@@ -37,7 +38,7 @@ If StochKit is installed, this process is similar, but instead set the environme
 ```
   git clone https://github.com/JohnAbel/gillespy.git
   cd gillespy
-  sudo STOCHKIT_HOME=$HOME/StochKit2.0.10/ python setup.py install
+  sudo STOCHKIT_HOME=$HOME/ python setup.py install
 ```
 
 As of this time, if only StochKit is installed, the StochKitODE solver is inaccessible.
@@ -67,7 +68,7 @@ If StochKit is installed, this process is similar, but instead set the environme
 ```
   git clone https://github.com/JohnAbel/gillespy.git
   cd gillespy
-  sudo STOCHKIT_HOME=/Applications/StochKit2.0.10/ python setup.py install
+  sudo STOCHKIT_HOME=/Applications/ python setup.py install
 ```
 
 As of this time, if only StochKit is installed, the StochKitODE solver is inaccessible.
