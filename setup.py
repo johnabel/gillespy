@@ -17,6 +17,10 @@ class Do_bdist_egg(setuptools.command.bdist_egg):
 class Do_build(distutils.command.build):
     sub_commands = distutils.command.build.sub_commands + [('build_gillespy', None)]
 
+class Install(install):
+    sub_commands = distutils.command.install.sub_commands + [('build_gillespy', None)]
+
+
 
 class GillesPyBuild(setuptools.Command):
     description = 'Configure GillesPy to find solvers'
@@ -35,8 +39,8 @@ class GillesPyBuild(setuptools.Command):
         cmd = "echo 'from .gillespy import *' > gillespy/__init__.py"
         cmd += "\necho 'import os' >> gillespy/__init__.py"
         if os.environ.get('STOCHSS_HOME') is not None:
-            cmd += "\necho 'os.environ[\'PATH\'] += os.pathsep + \"{0}/StochKit/\"' >> gillespy/__init__.py".format(os.environ['STOCHSS_HOME'])
-            cmd += "\necho 'os.environ[\'PATH\'] += os.pathsep + \"{0}/ode/\"' >> gillespy/__init__.py".format(os.environ['STOCHSS_HOME'])
+            cmd += "\necho 'os.environ[\"PATH\"] += os.pathsep + \"{0}/StochKit/\"' >> gillespy/__init__.py".format(os.environ['STOCHSS_HOME'])
+            cmd += "\necho 'os.environ[\"PATH\"] += os.pathsep + \"{0}/ode/\"' >> gillespy/__init__.py".format(os.environ['STOCHSS_HOME'])
             success=True
         if os.environ.get('STOCHKIT_HOME') is not None:
             cmd += "\necho 'os.environ[\"PATH\"] += os.pathsep + \"{0}\"' >> gillespy/__init__.py".format(os.environ['STOCHKIT_HOME'])
@@ -77,6 +81,7 @@ setup(name = "gillespy",
          'build' : Do_build,
          'bdist_egg' : Do_bdist_egg,
          'build_gillespy': GillesPyBuild,
+         'install':Install
       }
       
       )
