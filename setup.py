@@ -1,15 +1,15 @@
 from setuptools import setup
-from setuptools.command.install import install
+from setuptools.command.bdist_egg import bdist_egg as _bdist_egg
 import os
 
-class Install(install):
+class bdist_egg(_bdist_egg):
     def do_egg_install(self):
         success=False
         cmd = "echo 'from .gillespy import *' > gillespy/__init__.py"
         cmd += "\necho 'import os' >> gillespy/__init__.py"
         if os.environ.get('STOCHSS_HOME') is not None:
-            cmd += "\necho 'os.environ[\"PATH\"] += os.pathsep + \"{0}\"' >> gillespy/__init__.py".format(os.environ['STOCHSS_HOME'])
-            success=True
+            md += "\necho 'os.environ[\"PATH\"] += os.pathsep + \"{0}/StochKit/\"' >> gillespy/__init__.py".format(os.environ['STOCHSS_HOME'])
+            cmd += "\necho 'os.environ[\"PATH\"] += os.pathsep + \"{0}/ode/\"' >> gillespy/__init__.py".format(os.environ['STOCHSS_HOME'])            success=True
         if os.environ.get('STOCHKIT_HOME') is not None:
             cmd += "\necho 'os.environ[\"PATH\"] += os.pathsep + \"{0}\"' >> gillespy/__init__.py".format(os.environ['STOCHKIT_HOME'])
             success=True
@@ -21,8 +21,10 @@ class Install(install):
            raise Exception("StochKit not found, to simulate GillesPy models either StochKit solvers or StochSS must to be installed")
         
         os.system(cmd)
-        install.do_egg_install(self)
+        _bdist_egg.run(self)
 
+
+class 
 
 
 setup(name = "gillespy",
@@ -43,6 +45,6 @@ setup(name = "gillespy",
 
       download_url = "https://github.com/JohnAbel/GillesPy/tarball/master/",
       
-      cmdclass = {'install':Install}
+      cmdclass = {'bdist_egg':bdist_egg}
       
       )
