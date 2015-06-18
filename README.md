@@ -1,6 +1,6 @@
 #GillesPy
 
-GillesPy is a modeling toolkit for stochastic simulations for linux Ubuntu and OSX. It provides a python interface to the StochKit stochastic simulation solvers. It provides a simple python interface for model construction, editing, and simulating models stochastically and deterministically.
+GillesPy is a modeling toolkit for stochastic simulations for Linux and OSX. It provides a python interface to the StochKit stochastic simulation solvers. It contains a simple python interface for model construction, editing, and simulating models stochastically and deterministically.
 
 GillesPy is part of the StochSS project, see http://www.stochss.org for more details.
 
@@ -38,7 +38,7 @@ If StochKit is installed, this process is similar, but instead set the environme
 ```
   git clone https://github.com/JohnAbel/gillespy.git
   cd gillespy
-  sudo STOCHKIT_HOME=$HOME/ python setup.py install
+  sudo STOCHKIT_HOME=$HOME/StochKit2.0.10/ python setup.py install
 ```
 
 As of this time, if only StochKit is installed, the StochKitODE solver is inaccessible.
@@ -68,7 +68,7 @@ If StochKit is installed, this process is similar, but instead set the environme
 ```
   git clone https://github.com/JohnAbel/gillespy.git
   cd gillespy
-  sudo STOCHKIT_HOME=/Applications/ python setup.py install
+  sudo STOCHKIT_HOME=/Applications/StochKit2.0.10/ python setup.py install
 ```
 
 As of this time, if only StochKit is installed, the StochKitODE solver is inaccessible.
