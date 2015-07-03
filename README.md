@@ -1,6 +1,6 @@
 #GillesPy
 
-GillesPy is a modeling toolkit for stochastic simulations for linux Ubuntu and OSX. It provides a python interface to the StochKit stochastic simulation solvers. It contains a simple python interface for model construction, editing, and simulating models stochastically and deterministically.
+GillesPy is a modeling toolkit for stochastic simulations for Linux and OSX. It provides a python interface to the StochKit stochastic simulation solvers. It contains a simple python interface for model construction, editing, and simulating models stochastically and deterministically.
 
 GillesPy is part of the StochSS project, see http://www.stochss.org for more details.
 

@@ -6,7 +6,6 @@ Version 0.1 on github as of 12-4-2014.
     
 """
 
-# import 3rd party modules
 from collections import OrderedDict
 import scipy as sp
 import numpy as np
@@ -72,6 +71,10 @@ class Model(object):
         # Dict that holds flattended parameters and species for
         # evaluation of expressions in the scope of the model.
         self.namespace = OrderedDict([])
+        
+        # These are defaults for simulation, and yes it is a bit weired to have them here.
+        self.t = 20
+        self.increment = 0.05
     
     def serialize(self):
         """ Serializes a Model object to valid StochML. """
@@ -186,6 +189,20 @@ class Model(object):
         else:
             raise
 
+    def timespan(self, tspan):
+        """ Set the time span of simulation. Since StochKit does not support 
+            non-uniform timespans, we raise an error in that case. In future,
+            we will work around this. """
+        
+        items = numpy.diff(tspan)
+        items = map(lambda x: round(x, 10),items)
+        isuniform = (len(set(items)) == 1)
+        
+        if isuniform:
+            self.tspan = tspan
+        else:
+            raise InvalidModelError("StochKit only supports uniform timespans")
+
     def get_reaction(self, rname):
         return self.listOfReactions[rname]
 
@@ -198,7 +215,9 @@ class Model(object):
     def delete_all_reactions(self):
         self.listOfReactions.clear()
 
-    
+    def run(self, number_of_trajectories=1, seed=None, report_level=0):
+        return StochKitSolver.run(self,t=self.tspan[-1],increment=self.tspan[-1]-self.tspan[-2],seed=seed,number_of_trajectories=number_of_trajectories)
+
 
 class Species():
     """ Chemical species. """
@@ -778,84 +797,6 @@ class StochMLDocument():
         return e
 
 
-class StochKitTrajectory():
-    """
-        A StochKitTrajectory is a numpy ndarray.
-        The first column is the time points in the timeseries,
-        followed by species copy numbers.
-    """
-    
-    def __init__(self,data=None,id=None):
-        
-        # String identifier
-        self.id = id
-    
-        # Matrix with copy number data.
-        self.data = data
-        [self.tlen,self.ns] = np.shape(data);
-
-class StochKitEnsemble():
-    """ 
-        A stochKit ensemble is a collection of StochKitTrajectories,
-        all sharing a common set of metadata (generated from the same model 
-        instance).
-    """
-    
-    def __init__(self,id=None,trajectories=None,parentmodel=None):
-        # String identifier
-        self.id = id;
-        # Trajectory data
-        self.trajectories = trajectories
-        # Metadata
-        self.parentmodel = parentmodel
-        dims = np.shape(self.trajectories)
-        self.number_of_trajectories = dims[0]
-        self.tlen = dims[1]
-        self.number_of_species = dims[2]
-    
-    def add_trajectory(self,trajectory):
-        self.trajectories.append(trajectory)
-    
-    def dump(self, filename, type="mat"):
-        """ 
-            Serialize to a binary data file in a matrix format.
-            Supported formats are HDF5 (requires h5py), .MAT (for Matlab V. 
-            <= 7.2, requires SciPy). 
-            Matlab V > 7.3 uses HDF5 as it's base format for .mat files. 
-        """
-        
-        if type == "mat":
-            # Write to Matlab format.
-            filename = filename
-            # Build a struct that contains some metadata and the trajectories
-            ensemble = {'trajectories':self.trajectories, 
-                        'species_names':self.parentmodel.listOfSpecies, 
-                        'model_parameters':self.parentmodel.listOfParameters, 
-                        'number_of_species':self.number_of_species, 
-                        'number_of_trajectories':self.number_of_trajectories}
-            spio.savemat(filename,{self.id:ensemble},oned_as="column")
-        elif type == "hdf5":
-            print "Not supported yet."
-
-class StochKitOutputCollection():
-    """ 
-        A collection of StochKit Ensembles, not necessarily generated
-        from a common model instance (i.e. they do not necessarly have the 
-        same metadata).
-        This datastructure can be useful to store e.g. data from parameter 
-        sweeps, or simply an ensemble of ensembles.
-        
-        AH: Something like a PyTables object would be very useful here, if 
-        working in a Python environment. 
-        
-    """
-
-    def __init__(self,collection=[]):
-        self.collection = collection
-
-    def add_ensemble(self,ensemble):
-        self.collection.append(ensemble)
-
 class GillesPySolver():
     ''' abstract class for simulation methods '''
 
@@ -900,14 +841,20 @@ class GillesPySolver():
         
         
         outdir = prefix_outdir+'/'+ensemblename
-        print 'outdir',outdir
-            
+        
         realizations = number_of_trajectories
         if increment == None:
             increment = t/10;
 
-        if seed is None:
+        if seed == None:
             seed = 0
+        
+        # StochKit breaks for long ints
+        if seed.bit_length()>=32:
+            seed = seed & ((1<<32)-1)
+            if seed > (1 << 31) -1:
+                seed -= 1 << 32
+
 
         # Algorithm, SSA or Tau-leaping?
         executable = None
@@ -930,7 +877,7 @@ class GillesPySolver():
                         executable = os.path.join(dir, algorithm)
                         break
         if executable is None:
-            raise SimuliationError("stochkit executable '{0}' not found. \
+            raise SimulationError("stochkit executable '{0}' not found. \
                 Make sure it is your path, or set STOCHKIT_HOME envronment \
                 variable'".format(algorithm))
 
@@ -1021,44 +968,14 @@ class StochMLImportError(Exception):
 class InvalidStochMLError(Exception):
     pass
 
+class InvalidModelError(Exception):
+    pass
 
-#
-#
-#
+class SimulationError(Exception):
+    pass
 
 
 
-
-if __name__ == '__main__':
-    """
-    Here, as a test case, we run a simple two-state oscillator (Novak & Tyson 
-    2008) as an example of a stochastic reaction system.
-    """
-
-    from matplotlib import gridspec
-    
-    plt.figure(figsize=(3.5*2*3/4,2.62*3/4))
-    gs = gridspec.GridSpec(1,2)
-    
-    
-    ax0 = plt.subplot(gs[0,0])
-    ax0.plot(tyson_trajectories[0][:,0], tyson_trajectories[0][:,1], 
-             label='X')
-    ax0.plot(tyson_trajectories[0][:,0], tyson_trajectories[0][:,2], 
-             label='Y')
-    ax0.legend()
-    ax0.set_xlabel('Time')
-    ax0.set_ylabel('Species Count')
-    ax0.set_title('Time Series Oscillation')
-    
-    ax1 = plt.subplot(gs[0,1])
-    ax1.plot(tyson_trajectories[1][:,1], tyson_trajectories[0][:,2], 'k')
-    ax1.set_xlabel('X')
-    ax1.set_ylabel('Y')
-    ax1.set_title('Phase-Space Plot')
-    
-    plt.tight_layout()
-    plt.show()
 
     
     
