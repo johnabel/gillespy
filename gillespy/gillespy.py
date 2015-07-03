@@ -1044,43 +1044,7 @@ class InvalidModelError(Exception):
     pass
 
 
-#
-#
-#
 
-
-
-
-if __name__ == '__main__':
-    """
-    Here, as a test case, we run a simple two-state oscillator (Novak & Tyson 
-    2008) as an example of a stochastic reaction system.
-    """
-
-    from matplotlib import gridspec
-    
-    plt.figure(figsize=(3.5*2*3/4,2.62*3/4))
-    gs = gridspec.GridSpec(1,2)
-    
-    
-    ax0 = plt.subplot(gs[0,0])
-    ax0.plot(tyson_trajectories[0][:,0], tyson_trajectories[0][:,1], 
-             label='X')
-    ax0.plot(tyson_trajectories[0][:,0], tyson_trajectories[0][:,2], 
-             label='Y')
-    ax0.legend()
-    ax0.set_xlabel('Time')
-    ax0.set_ylabel('Species Count')
-    ax0.set_title('Time Series Oscillation')
-    
-    ax1 = plt.subplot(gs[0,1])
-    ax1.plot(tyson_trajectories[1][:,1], tyson_trajectories[0][:,2], 'k')
-    ax1.set_xlabel('X')
-    ax1.set_ylabel('Y')
-    ax1.set_title('Phase-Space Plot')
-    
-    plt.tight_layout()
-    plt.show()
 
     
     
