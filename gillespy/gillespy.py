@@ -216,7 +216,7 @@ class Model(object):
         self.listOfReactions.clear()
 
     def run(self, number_of_trajectories=1, seed=None, report_level=0):
-        return StochKitSolver.run(self,t=self.tspan[-1],increment=self.tspan[-1]-self.tspan[-2],number_of_trajectories=number_of_trajectories)
+        return StochKitSolver.run(self,t=self.tspan[-1],increment=self.tspan[-1]-self.tspan[-2],seed=seed,number_of_trajectories=number_of_trajectories)
 
 
 class Species():
