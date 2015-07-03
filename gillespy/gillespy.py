@@ -6,7 +6,6 @@ Version 0.1 on github as of 12-4-2014.
     
 """
 
-# import 3rd party modules
 from collections import OrderedDict
 import scipy as sp
 import numpy as np
@@ -72,6 +71,10 @@ class Model(object):
         # Dict that holds flattended parameters and species for
         # evaluation of expressions in the scope of the model.
         self.namespace = OrderedDict([])
+        
+        # These are defaults for simulation, and yes it is a bit weired to have them here.
+        self.t = 20
+        self.increment = 0.05
     
     def serialize(self):
         """ Serializes a Model object to valid StochML. """
@@ -186,6 +189,20 @@ class Model(object):
         else:
             raise
 
+    def timespan(self, tspan):
+        """ Set the time span of simulation. Since StochKit does not support 
+            non-uniform timespans, we raise an error in that case. In future,
+            we will work around this. """
+        
+        items = numpy.diff(tspan)
+        items = map(lambda x: round(x, 10),items)
+        isuniform = (len(set(items)) == 1)
+        
+        if isuniform:
+            self.tspan = tspan
+        else:
+            raise InvalidModelError("StochKit only supports uniform timespans")
+
     def get_reaction(self, rname):
         return self.listOfReactions[rname]
 
@@ -198,7 +215,9 @@ class Model(object):
     def delete_all_reactions(self):
         self.listOfReactions.clear()
 
-    
+    def run(self, number_of_trajectories=1, seed=None, report_level=0):
+        return gillespy.StochKitSolver.run(self,t=self.tspan[-1],increment=self.tspan[-1]-self.tspan[-2],number_of_trajectories=number_of_trajectories)
+
 
 class Species():
     """ Chemical species. """
@@ -1019,6 +1038,9 @@ class StochMLImportError(Exception):
     pass
 
 class InvalidStochMLError(Exception):
+    pass
+
+class InvalidModelError(Exception):
     pass
 
 
