@@ -846,8 +846,15 @@ class GillesPySolver():
         if increment == None:
             increment = t/10;
 
-        if seed is None:
+        if seed == None:
             seed = 0
+        
+        # StochKit breaks for long ints
+        if seed.bit_length()>=32:
+            seed = seed & ((1<<32)-1)
+            if seed > (1 << 31) -1:
+                seed -= 1 << 32
+
 
         # Algorithm, SSA or Tau-leaping?
         executable = None
