@@ -841,7 +841,6 @@ class GillesPySolver():
         
         
         outdir = prefix_outdir+'/'+ensemblename
-        print 'outdir',outdir
             
         realizations = number_of_trajectories
         if increment == None:
