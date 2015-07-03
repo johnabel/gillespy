@@ -841,7 +841,7 @@ class GillesPySolver():
         
         
         outdir = prefix_outdir+'/'+ensemblename
-            
+        
         realizations = number_of_trajectories
         if increment == None:
             increment = t/10;
@@ -870,7 +870,7 @@ class GillesPySolver():
                         executable = os.path.join(dir, algorithm)
                         break
         if executable is None:
-            raise SimuliationError("stochkit executable '{0}' not found. \
+            raise SimulationError("stochkit executable '{0}' not found. \
                 Make sure it is your path, or set STOCHKIT_HOME envronment \
                 variable'".format(algorithm))
 
@@ -962,6 +962,9 @@ class InvalidStochMLError(Exception):
     pass
 
 class InvalidModelError(Exception):
+    pass
+
+class SimulationError(Exception):
     pass
 
 
