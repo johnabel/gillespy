@@ -21,14 +21,14 @@ def stoch_path(command_subclass):
         cmd = "echo 'from .gillespy import *' > {0}/gillespy/__init__.py".format(SETUP_DIR)
         cmd += "\necho 'import os' >> {0}/gillespy/__init__.py".format(SETUP_DIR)
         if os.environ.get('STOCHSS_HOME') is not None:
-            cmd += "\necho 'os.environ[\"PATH\"] += os.pathsep + \"{0}/StochKit/\"' >> {1}/gillespy/__init__.py".format(os.environ['STOCHSS_HOME'],SETUP_DIR)
-            cmd += "\necho 'os.environ[\"PATH\"] += os.pathsep + \"{0}/ode/\"' >> {1}/gillespy/__init__.py".format(os.environ['STOCHSS_HOME'],SETUP_DIR)            
+            cmd += "\necho 'os.environ[\"PATH\"] += os.pathsep + \"{0}/StochKit/\"' >> {1}/gillespy/__init__.py".format(os.path.abspath(os.environ['STOCHSS_HOME']),SETUP_DIR)
+            cmd += "\necho 'os.environ[\"PATH\"] += os.pathsep + \"{0}/ode/\"' >> {1}/gillespy/__init__.py".format(os.path.abspath(os.environ['STOCHSS_HOME']),SETUP_DIR)            
             success=True
         if os.environ.get('STOCHKIT_HOME') is not None:
-            cmd += "\necho 'os.environ[\"PATH\"] += os.pathsep + \"{0}\"' >> {1}/gillespy/__init__.py".format(os.environ['STOCHKIT_HOME'],SETUP_DIR)
+            cmd += "\necho 'os.environ[\"PATH\"] += os.pathsep + \"{0}\"' >> {1}/gillespy/__init__.py".format(os.path.abspath(os.environ['STOCHKIT_HOME']),SETUP_DIR)
             success=True
         if os.environ.get('STOCHKIT_ODE_HOME') is not None:
-            cmd += "\necho 'os.environ[\"PATH\"] += os.pathsep + \"{0}\"' >> {1}/gillespy/__init__.py".format(os.environ['STOCHKIT_ODE_HOME'],SETUP_DIR)
+            cmd += "\necho 'os.environ[\"PATH\"] += os.pathsep + \"{0}\"' >> {1}/gillespy/__init__.py".format(os.path.abspath(os.environ['STOCHKIT_ODE_HOME']),SETUP_DIR)
             success=True
         if success is False:
            raise Exception("StochKit not found, to simulate GillesPy models either StochKit solvers or StochSS must to be installed")
