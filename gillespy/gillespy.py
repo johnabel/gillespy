@@ -885,7 +885,7 @@ class GillesPySolver():
         args += ' -t '
         args += str(t)
         if increment == None:
-            increment = t/10
+            increment = t/20.0
         num_output_points = str(int(float(t/increment)))
         args += ' -i ' + num_output_points
         if ensemblename in directories:
@@ -924,7 +924,7 @@ class StochKitSolver(GillesPySolver):
     @classmethod
     def run(cls, model, t=20, number_of_trajectories=10,
             increment=0.05, seed=None, stochkit_home=None, algorithm='ssa',
-            job_id=None):
+            job_id=None, method=None):
         # all this is specific to StochKit
         if seed is None:
             seed = random.randint(0, 2147483647)
@@ -946,6 +946,9 @@ class StochKitSolver(GillesPySolver):
         realizations = number_of_trajectories
         args += ' --realizations '
         args += str(realizations)
+
+        if method is not None:  #This only works for StochKit 2.1
+            args += ' --method ' + str(method)
 
         
         self = StochKitSolver()
