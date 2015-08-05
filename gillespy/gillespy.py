@@ -13,6 +13,8 @@ import matplotlib.pyplot as plt
 import tempfile
 import uuid
 import subprocess
+import types
+import random
 
 try:
     import lxml.etree as etree
@@ -215,8 +217,14 @@ class Model(object):
     def delete_all_reactions(self):
         self.listOfReactions.clear()
 
-    def run(self, number_of_trajectories=1, seed=None, report_level=0):
-        return StochKitSolver.run(self,t=self.tspan[-1],increment=self.tspan[-1]-self.tspan[-2],seed=seed,number_of_trajectories=number_of_trajectories)
+    def run(self, number_of_trajectories=1, seed=None, report_level=0, solver=None):
+        if solver is not None:
+            if isinstance(solver, (type, types.ClassType)) and  issubclass(solver, GillesPySolver):
+                return solver.run(self,t=self.tspan[-1],increment=self.tspan[-1]-self.tspan[-2],seed=seed,number_of_trajectories=number_of_trajectories)
+            else:
+                raise SimuliationError('argument "solver" to run() must be a subclass of GillesPySolver')
+        else:
+            return StochKitSolver.run(self,t=self.tspan[-1],increment=self.tspan[-1]-self.tspan[-2],seed=seed,number_of_trajectories=number_of_trajectories)
 
 
 class Species():
@@ -800,10 +808,9 @@ class StochMLDocument():
 class GillesPySolver():
     ''' abstract class for simulation methods '''
 
-    @classmethod
-    def run(cls, model, t=20, number_of_trajectories=10,
+    def run(self, model, t=20, number_of_trajectories=10,
             increment=0.05, seed=None, stochkit_home=None, algorithm=None,
-            job_id=None):
+            job_id=None, extra_args=''):
         """ 
         Call out and run the solver. Collect the results.
         """
@@ -842,19 +849,6 @@ class GillesPySolver():
         
         outdir = prefix_outdir+'/'+ensemblename
         
-        realizations = number_of_trajectories
-        if increment == None:
-            increment = t/10;
-
-        if seed == None:
-            seed = 0
-        
-        # StochKit breaks for long ints
-        if seed.bit_length()>=32:
-            seed = seed & ((1<<32)-1)
-            if seed > (1 << 31) -1:
-                seed -= 1 << 32
-
 
         # Algorithm, SSA or Tau-leaping?
         executable = None
@@ -890,55 +884,38 @@ class GillesPySolver():
         args += ' --out-dir '+outdir
         args += ' -t '
         args += str(t)
+        if increment == None:
+            increment = t/20.0
         num_output_points = str(int(float(t/increment)))
         args += ' -i ' + num_output_points
-        args += ' --realizations '
-        args += str(realizations)
         if ensemblename in directories:
             print 'Ensemble '+ensemblename+' already existed, using --force.'
             args+=' --force'
         
-        # Only use on processor per StochKit job. 
-        args += ' -p 1'
-      
-        # We keep all the trajectories by default.
-        args += ' --keep-trajectories'
-
-        args += ' --seed '
-        args += str(seed)
 
         # If we are using local mode, shell out and run StochKit 
-        # (SSA or Tau-leaping)
-        cmd = executable+' '+args
+        # (SSA or Tau-leaping or ODE)
+        cmd = executable+' '+args+' '+extra_args
 
         # Execute
         try:
-            handle = subprocess.Popen(cmd.split(' '))
+            #print "CMD: {0}".format(cmd)
+            handle = subprocess.Popen(cmd, stdout = subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
             return_code = handle.wait()
             if return_code != 0:
+                print handle.stdout.read()
+                print handle.stderr.read()
                 raise SimuliationError("Solver execution failed: \
                 '{0}'".format(cmd))
         except OSError as e:
             raise SimuliationError("Solver execution failed: \
             {0}\n{1}".format(cmd, e))
         
-        # Collect all the output data
-        files = os.listdir(outdir + '/stats')
-           
-        trajectories = []
-        files = os.listdir(outdir + '/trajectories')
-        
-        for filename in files:
-            if 'trajectory' in filename:
-                trajectories.append(numpy.loadtxt(outdir + '/trajectories/' + 
-                                        filename))
-            else:
-                raise SimuliationError("Couldn't identify file '{0}' found in \
-                                        output folder".format(filename))
-
+        # Get data using solver specific function
+        trajectories = self.get_trajectories(outdir)
         # Clean up
         shutil.rmtree(prefix_basedir)
-
+        # Return data
         return trajectories
 
 class StochKitSolver(GillesPySolver):
@@ -947,8 +924,49 @@ class StochKitSolver(GillesPySolver):
     @classmethod
     def run(cls, model, t=20, number_of_trajectories=10,
             increment=0.05, seed=None, stochkit_home=None, algorithm='ssa',
-            job_id=None):
-        return GillesPySolver.run(model,t, number_of_trajectories, increment, seed, stochkit_home, algorithm, job_id)
+            job_id=None, method=None):
+        # all this is specific to StochKit
+        if seed is None:
+            seed = random.randint(0, 2147483647)
+        # StochKit breaks for long ints
+        if seed.bit_length()>=32:
+            seed = seed & ((1<<32)-1)
+            if seed > (1 << 31) -1:
+                seed -= 1 << 32
+
+        # Only use on processor per StochKit job.
+        args = ' -p 1'
+      
+        # We keep all the trajectories by default.
+        args += ' --keep-trajectories'
+
+        args += ' --seed '
+        args += str(seed)
+        
+        realizations = number_of_trajectories
+        args += ' --realizations '
+        args += str(realizations)
+
+        if method is not None:  #This only works for StochKit 2.1
+            args += ' --method ' + str(method)
+
+        
+        self = StochKitSolver()
+        return GillesPySolver.run(self, model,t, number_of_trajectories, increment, seed, stochkit_home, algorithm, job_id, extra_args=args)
+
+    def get_trajectories(self, outdir):
+        # Collect all the output data
+        files = os.listdir(outdir + '/stats')
+        trajectories = []
+        files = os.listdir(outdir + '/trajectories')
+        for filename in files:
+            if 'trajectory' in filename:
+                trajectories.append(numpy.loadtxt(outdir + '/trajectories/' + 
+                                        filename))
+            else:
+                raise SimuliationError("Couldn't identify file '{0}' found in \
+                                        output folder".format(filename))
+        return trajectories
 
 
 class StochKitODESolver(GillesPySolver):
@@ -958,7 +976,15 @@ class StochKitODESolver(GillesPySolver):
     def run(cls, model, t=20, number_of_trajectories=10,
             increment=0.05, seed=None, stochkit_home=None, algorithm='stochkit_ode.py',
             job_id=None):
-        return GillesPySolver.run(model,t, number_of_trajectories, increment, seed, stochkit_home, algorithm, job_id)
+        self = StochKitODESolver()
+        return GillesPySolver.run(self,model,t, number_of_trajectories, increment, seed, stochkit_home, algorithm, job_id)
+
+    def get_trajectories(self, outdir):
+        # Collect all the output data
+        trajectories = []
+        trajectories.append(numpy.loadtxt(outdir + '/output.txt', skiprows=3, comments='-'))
+
+        return trajectories
 
 
 # Exceptions
