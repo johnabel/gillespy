@@ -217,14 +217,14 @@ class Model(object):
     def delete_all_reactions(self):
         self.listOfReactions.clear()
 
-    def run(self, number_of_trajectories=1, seed=None, report_level=0, solver=None):
+    def run(self, number_of_trajectories=1, seed=None, report_level=0, solver=None, stochkit_home=None):
         if solver is not None:
             if isinstance(solver, (type, types.ClassType)) and  issubclass(solver, GillesPySolver):
-                return solver.run(self,t=self.tspan[-1],increment=self.tspan[-1]-self.tspan[-2],seed=seed,number_of_trajectories=number_of_trajectories)
+                return solver.run(self,t=self.tspan[-1],increment=self.tspan[-1]-self.tspan[-2],seed=seed,number_of_trajectories=number_of_trajectories, stochkit_home=stochkit_home)
             else:
                 raise SimuliationError('argument "solver" to run() must be a subclass of GillesPySolver')
         else:
-            return StochKitSolver.run(self,t=self.tspan[-1],increment=self.tspan[-1]-self.tspan[-2],seed=seed,number_of_trajectories=number_of_trajectories)
+            return StochKitSolver.run(self,t=self.tspan[-1],increment=self.tspan[-1]-self.tspan[-2],seed=seed,number_of_trajectories=number_of_trajectories, stochkit_home=stochkit_home)
 
 
 class Species():
@@ -912,14 +912,17 @@ class GillesPySolver():
             {0}\n{1}".format(cmd, e))
         
         # Get data using solver specific function
-        trajectories = self.get_trajectories(outdir)
+        try:
+            trajectories = self.get_trajectories(outdir)
+        except Exception as e:
+            raise SimulationError("Error using solver.get_trajectories('{0}'): {1}".format(outdir, e))
         # Clean up
         shutil.rmtree(prefix_basedir)
         # Return data
         return trajectories
 
 class StochKitSolver(GillesPySolver):
-    ''' Solver class to simulate Stochasticly with StockKit. '''
+    ''' Solver class to simulate Stochastically with StockKit. '''
     
     @classmethod
     def run(cls, model, t=20, number_of_trajectories=10,
@@ -970,7 +973,7 @@ class StochKitSolver(GillesPySolver):
 
 
 class StochKitODESolver(GillesPySolver):
-    ''' Solver class to simulate Stochasticly with StockKit. '''
+    ''' Solver class to simulate deterministically with StockKitODE. '''
     
     @classmethod
     def run(cls, model, t=20, number_of_trajectories=10,
@@ -982,8 +985,16 @@ class StochKitODESolver(GillesPySolver):
     def get_trajectories(self, outdir):
         # Collect all the output data
         trajectories = []
-        trajectories.append(numpy.loadtxt(outdir + '/output.txt', skiprows=3, comments='-'))
-
+        with open(outdir + '/output.txt') as fd:
+            fd.readline()
+            headers = fd.readline()
+            fd.readline()
+            data = []
+            data.append([float(x) for x in fd.readline().split()])
+            fd.readline()
+            for line in fd:
+                data.append([float(x) for x in line.split()])
+        trajectories.append(numpy.array(data))
         return trajectories
 
 
