@@ -73,7 +73,6 @@ class Model(object):
                 raise Warning("Concentration models account for volume implicitly,explicit volume definition is not required. Note: concentration models may only be simulated deterministically.")
         
         self.volume = volume
-        self.add_parameter(Parameter(name='vol', expression=volume))
         
         # Dict that holds flattended parameters and species for
         # evaluation of expressions in the scope of the model.
@@ -103,6 +102,7 @@ class Model(object):
     
     def update_namespace(self):
         """ Create a dict with flattened parameter and species objects. """
+        self.namespace = OrderedDict([])
         for param in self.listOfParameters:
             self.namespace[param]=self.listOfParameters[param].value
         # Dictionary of expressions that can be evaluated in the scope of this
@@ -143,7 +143,7 @@ class Model(object):
         if units.lower() == 'concentration' or units.lower() == 'population':
             self.units = units.lower()
         else:
-            raise Exception("units must be either concentration or \
+            raise ModelError("units must be either concentration or \
                                 population (case insensitive)")
 
     def get_parameter(self,pname):
@@ -403,7 +403,7 @@ class Reaction():
             # Case 1: 2X -> Y
             if self.reactants[r] == 2:
                 propensity_function = ("0.5*" +propensity_function+ 
-                                            "*"+r+"*("+r+"-1)")
+                                            "*"+r+"*("+r+"-1)/vol")
             else:
             # Case 3: X1, X2 -> Y;
                 propensity_function += "*"+r
@@ -441,13 +441,10 @@ class Reaction():
 # Module exceptions
 class ModelError(Exception):
     pass
-
 class SpeciesError(ModelError):
     pass
-
 class ReactionError(ModelError):
     pass
-
 class ParameterError(ModelError):
     pass
 class SimuliationError(Exception):
@@ -461,6 +458,7 @@ class StochMLDocument():
     def __init__(self):
         # The root element
         self.document = etree.Element("Model")
+        self.annotation = None
     
     @classmethod
     def from_model(cls,model):
@@ -515,15 +513,14 @@ class StochMLDocument():
             params.append(md.parameter_to_element(
                                         model.listOfParameters[pname]))
 
-        #if model.volume != None and model.units == "population":
-        #    params.append(md.species_to_element(model.volume))
+        params.append(md.parameter_to_element(Parameter(name='vol', expression=model.volume)))
 
         md.document.append(params)
         
         # Reactions
         reacs = etree.Element('ReactionsList')
         for rname in model.listOfReactions:
-            reacs.append(md.reaction_to_element(model.listOfReactions[rname]))
+            reacs.append(md.reaction_to_element(model.listOfReactions[rname], model.volume))
         md.document.append(reacs)
         
         return md
@@ -762,44 +759,35 @@ class StochMLDocument():
         e.append(expressionElement)
         return e
     
-    def reaction_to_element(self,R):
+    def reaction_to_element(self,R, model_volume):
         e = etree.Element('Reaction')
         
         idElement = etree.Element('Id')
         idElement.text = R.name
         e.append(idElement)
         
-        try:
-            descriptionElement = etree.Element('Description')
-            descriptionElement.text = self.annotation
-            e.append(descriptionElement)
-        except:
-            pass
+        descriptionElement = etree.Element('Description')
+        descriptionElement.text = self.annotation
+        e.append(descriptionElement)
         
-        try:
-            typeElement = etree.Element('Type')
-            typeElement.text = R.type
-            e.append(typeElement)
-        except:
-            pass
-    
+
         # StochKit2 wants a rate for mass-action propensites
-        if R.massaction:
-            try:
-                rateElement = etree.Element('Rate')
-                # A mass-action reactions should only have one parameter
-                rateElement.text = R.marate.name
-                e.append(rateElement)
-            except:
-                pass
+        if R.massaction and model_volume == 1.0:
+            rateElement = etree.Element('Rate')
+            # A mass-action reactions should only have one parameter
+            rateElement.text = R.marate.name
+            typeElement = etree.Element('Type')
+            typeElement.text = 'mass-action'
+            e.append(typeElement)
+            e.append(rateElement)
 
         else:
-            #try:
+            typeElement = etree.Element('Type')
+            typeElement.text = 'customized'
+            e.append(typeElement)
             functionElement = etree.Element('PropensityFunction')
             functionElement.text = R.propensity_function
             e.append(functionElement)
-            #except:
-            #    pass
 
         reactants = etree.Element('Reactants')
 
@@ -847,7 +835,7 @@ class GillesPySolver():
         if isinstance(model, Model):
             outfile =  os.path.join(prefix_basedir, "temp_input_"+job_id+".xml")
             mfhandle = open(outfile, 'w')
-            document = StochMLDocument.from_model(model)
+            #document = StochMLDocument.from_model(model)
 
         # If the model is a Model instance, we serialize it to XML,
         # and if it is an XML file, we just make a copy.
@@ -948,7 +936,7 @@ class StochKitSolver(GillesPySolver):
     
         # all this is specific to StochKit
         if model.units == "concentration":
-            raise Exception("StochKit can only simulate population models, please convert to population-based model for stochastic simulation. Use solver = StochKitODESolver instead to simulate a concentration model deterministically.")
+            raise SimuliationError("StochKit can only simulate population models, please convert to population-based model for stochastic simulation. Use solver = StochKitODESolver instead to simulate a concentration model deterministically.")
 
         if seed is None:
             seed = random.randint(0, 2147483647)
