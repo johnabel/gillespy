@@ -42,7 +42,7 @@ class Simple1(gillespy.Model):
                 products = {},
                 rate = k1 )
                 
-        #self.add_reaction(rxn1)
+        self.add_reaction(rxn1)
         
         rxn2 = gillespy.Reaction(
                 name = 'r2d',
