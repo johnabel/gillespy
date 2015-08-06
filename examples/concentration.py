@@ -42,7 +42,7 @@ class Simple1(gillespy.Model):
                 products = {},
                 rate = k1 )
                 
-        self.add_reaction(rxn1)
+        #self.add_reaction(rxn1)
         
         rxn2 = gillespy.Reaction(
                 name = 'r2d',
@@ -59,16 +59,17 @@ if __name__ == '__main__':
     # We could pass new parameter values to this model here if we wished.
     simple_1 = Simple1(volume=10)
 
-    
+    import time
+    tick = time.time()
     # The model object is simulated with the StochKit solver, and 25 
     # trajectories are returned.
     num_trajectories = 1
     simple_1trajectories = gillespy.StochKitSolver.run(simple_1, 
             number_of_trajectories = num_trajectories)
-
+    print time.time() - tick
     # PLOTTING
 
-
+    """
     # here, we will plot all trajectories with the mean overlaid
     from matplotlib import gridspec
     
@@ -92,6 +93,7 @@ if __name__ == '__main__':
     
     plt.tight_layout()
     plt.show()
+    """
 
     
     

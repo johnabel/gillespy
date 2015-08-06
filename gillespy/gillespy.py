@@ -48,7 +48,7 @@ class Model(object):
     
     """
     
-    def __init__(self, name="", volume=1.0):
+    def __init__(self, name="", volume=1.0, population = True):
         """ Create an empty model. """
         
         # The name that the model is referenced by (should be a String)
@@ -65,7 +65,12 @@ class Model(object):
 
         # This defines the unit system at work for all numbers in the model
         #   It should be a logical error to leave this undefined, subclasses should set it
-        self.units = "population"
+        if population == True:
+            self.units = "population"
+        else: 
+            self.units = "concentration"
+            if volume != 1.0:
+                raise Warning("Concentration models account for volume implicitly,explicit volume definition is not required. Note: concentration models may only be simulated deterministically.")
         
         self.volume = volume
         self.add_parameter(Parameter(name='vol', expression=volume))
@@ -940,7 +945,11 @@ class StochKitSolver(GillesPySolver):
     def run(cls, model, t=20, number_of_trajectories=1,
             increment=0.05, seed=None, stochkit_home=None, algorithm='ssa',
             job_id=None, method=None):
+    
         # all this is specific to StochKit
+        if model.units == "concentration":
+            raise Exception("StochKit can only simulate population models, please convert to population-based model for stochastic simulation. Use solver = StochKitODESolver instead to simulate a concentration model deterministically.")
+
         if seed is None:
             seed = random.randint(0, 2147483647)
         # StochKit breaks for long ints
