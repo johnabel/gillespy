@@ -19,7 +19,7 @@ Installation instructions for StochSS:  http://iguana.cs.ucsb.edu/wordpress/?pag
 
 ##Installation
 
-Installation instructions are provided for linux Ubuntu and OSX.
+Installation instructions are provided for Linux Ubuntu and OSX.
 
 ##### Ubuntu
 
