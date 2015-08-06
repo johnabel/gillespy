@@ -1,8 +1,18 @@
+# -*- coding: utf-8 -*-
+"""
+Created on Wed Aug  5 16:50:12 2015
+
+@author: john
+"""
+
+import scipy as sp
+import numpy as np
+import matplotlib.pyplot as plt
+
 import sys
-sys.path[:0] = ['..']
+sys.path.append('../')
+
 import gillespy
-import time
-import numpy
 
 class Simple1(gillespy.Model):
     """
@@ -32,7 +42,7 @@ class Simple1(gillespy.Model):
                 products = {},
                 rate = k1 )
                 
-        self.add_reaction(rxn1)
+        #self.add_reaction(rxn1)
         
         rxn2 = gillespy.Reaction(
                 name = 'r2d',
@@ -41,65 +51,51 @@ class Simple1(gillespy.Model):
                 propensity_function = 'k1/2 * r2*(r2-1)/vol' )
                 
         self.add_reaction(rxn2)
-        self.timespan(numpy.linspace(0,100,101))
-
-simple_1 = Simple1(volume=1)
-simple_10 = Simple1(volume=10)
-num_trajectories = 1
-
-tick = time.time()
-simple_1trajectories = simple_1.run(number_of_trajectories = num_trajectories, stochkit_home="/Applications/StochSS-1.6/StochSSserver.app/Contents/Resources/StochKit/")
-print 'vol=1\t',time.time() - tick
-
-tick = time.time()
-simple_10trajectories = simple_10.run(number_of_trajectories = num_trajectories, stochkit_home="/Applications/StochSS-1.6/StochSSserver.app/Contents/Resources/StochKit/")
-print 'vol=10\t',time.time() - tick
 
 
-print simple_10.serialize()
+if __name__ == '__main__':
 
-from matplotlib import gridspec
+    # Here, we create the model object.
+    # We could pass new parameter values to this model here if we wished.
+    simple_1 = Simple1(volume=10)
 
-gs = gridspec.GridSpec(1,1)
+    import time
+    tick = time.time()
+    # The model object is simulated with the StochKit solver, and 25 
+    # trajectories are returned.
+    num_trajectories = 1
+    simple_1trajectories = gillespy.StochKitSolver.run(simple_1, 
+            number_of_trajectories = num_trajectories)
+    print time.time() - tick
+    # PLOTTING
 
-plt.figure()
-ax0 = plt.subplot(gs[0,0])
+    """
+    # here, we will plot all trajectories with the mean overlaid
+    from matplotlib import gridspec
+    
+    gs = gridspec.GridSpec(1,1)
+    
+    plt.figure()
+    ax0 = plt.subplot(gs[0,0])
 
-# extract time values
-t = np.array(simple_1trajectories[0][:,0]) 
+    # extract time values
+    time = np.array(simple_1trajectories[0][:,0]) 
 
-# extract just the trajectories for S into a numpy array
+    # extract just the trajectories for S into a numpy array
+    
+    #plot mean
+    ax0.plot(time,simple_1trajectories[0][:,1],'k--',label='ma')
+    ax0.plot(time,simple_1trajectories[0][:,2],'g+',label='custom')
+    
+    ax0.legend()
+    ax0.set_xlabel('Time')
+    ax0.set_ylabel('Species r Count')
+    
+    plt.tight_layout()
+    plt.show()
+    """
 
-#plot mean
-ax0.plot(t,simple_1trajectories[0][:,1],'k--',label='ma')
-ax0.plot(t,simple_1trajectories[0][:,2],'g+',label='custom')
-
-ax0.legend()
-ax0.set_xlabel('Time')
-ax0.set_ylabel('Species r Count')
-
-plt.tight_layout()
-plt.show()
-
-gs = gridspec.GridSpec(1,1)
-
-plt.figure()
-ax0 = plt.subplot(gs[0,0])
-
-# extract time values
-t = np.array(simple_10trajectories[0][:,0]) 
-
-# extract just the trajectories for S into a numpy array
-
-#plot mean
-ax0.plot(t,simple_10trajectories[0][:,1],'k--',label='ma')
-ax0.plot(t,simple_10trajectories[0][:,2],'g+',label='custom')
-
-ax0.legend()
-ax0.set_xlabel('Time')
-ax0.set_ylabel('Species r Count')
-
-plt.tight_layout()
-plt.show()
-
-
+    
+    
+    
+    
