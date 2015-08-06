@@ -77,6 +77,18 @@ class Model(object):
         # These are defaults for simulation, and yes it is a bit weired to have them here.
         self.t = 20
         self.increment = 0.05
+        
+    def import_SBML(self,filename):
+        """ SBML to GillesPy model converter. NOTE: non-mass-action rates
+        in terms of concentrations may not be converted for population 
+        simulation"""
+        
+        try:
+            from SBMLimport import convert
+        except ImportError:
+            raise ImportError('SBML conversion not imported successfully')
+            
+        convert(filename, modelName = self.name, gillespy_model = self)
     
     def serialize(self):
         """ Serializes a Model object to valid StochML. """
