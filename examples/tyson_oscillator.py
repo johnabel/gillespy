@@ -3,7 +3,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 import sys
-sys.path.append('../')
+sys.path[:0] = ['..']
 import gillespy
 
 class Tyson2StateOscillator(gillespy.Model):
@@ -16,6 +16,7 @@ class Tyson2StateOscillator(gillespy.Model):
         """
         system_volume = 300 #system volume
         gillespy.Model.__init__(self, name="tyson-2-state", volume=system_volume)
+        self.timespan(np.linspace(0,100,101))
         # =============================================
         # Define model species, initial values, parameters, and volume
         # =============================================    
@@ -90,7 +91,7 @@ if __name__ == '__main__':
     # =============================================  
     # To set up the model, first create an empty model object. Then, add
     # species and parameters as was set up above.
-    tyson_trajectories = gillespy.StochKitSolver.run(tyson_model)
+    tyson_trajectories = tyson_model.run()
     
     # =============================================  
     # plot just the first trajectory, 0, in both time and phase space:
@@ -111,7 +112,7 @@ if __name__ == '__main__':
     ax0.set_title('Time Series Oscillation')
     
     ax1 = plt.subplot(gs[0,1])
-    ax1.plot(tyson_trajectories[1][:,1], tyson_trajectories[0][:,2], 'k')
+    ax1.plot(tyson_trajectories[0][:,1], tyson_trajectories[0][:,2], 'k')
     ax1.set_xlabel('X')
     ax1.set_ylabel('Y')
     ax1.set_title('Phase-Space Plot')
