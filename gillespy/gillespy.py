@@ -808,7 +808,7 @@ class StochMLDocument():
 class GillesPySolver():
     ''' abstract class for simulation methods '''
 
-    def run(self, model, t=20, number_of_trajectories=10,
+    def run(self, model, t=20, number_of_trajectories=1,
             increment=0.05, seed=None, stochkit_home=None, algorithm=None,
             job_id=None, extra_args=''):
         """ 
@@ -925,7 +925,7 @@ class StochKitSolver(GillesPySolver):
     ''' Solver class to simulate Stochastically with StockKit. '''
     
     @classmethod
-    def run(cls, model, t=20, number_of_trajectories=10,
+    def run(cls, model, t=20, number_of_trajectories=1,
             increment=0.05, seed=None, stochkit_home=None, algorithm='ssa',
             job_id=None, method=None):
         # all this is specific to StochKit
@@ -976,7 +976,7 @@ class StochKitODESolver(GillesPySolver):
     ''' Solver class to simulate deterministically with StockKitODE. '''
     
     @classmethod
-    def run(cls, model, t=20, number_of_trajectories=10,
+    def run(cls, model, t=20, number_of_trajectories=1,
             increment=0.05, seed=None, stochkit_home=None, algorithm='stochkit_ode.py',
             job_id=None):
         self = StochKitODESolver()
