@@ -914,23 +914,42 @@ class GillesPySolver():
             #print "CMD: {0}".format(cmd)
             handle = subprocess.Popen(cmd, stdout = subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
             return_code = handle.wait()
-            if return_code != 0:
-                print handle.stdout.read()
-                print handle.stderr.read()
-                raise SimuliationError("Solver execution failed: \
-                '{0}'".format(cmd))
         except OSError as e:
             raise SimuliationError("Solver execution failed: \
             {0}\n{1}".format(cmd, e))
         
+        try:
+            stderr = handle.stderr.read()
+        except Exception as e:
+            stderr = 'Error reading stderr: {0}'.format(e)
+        try:
+            stdout = handle.stdout.read()
+        except Exception as e:
+            stdout = 'Error reading stdout: {0}'.format(e)
+
+        if return_code != 0:
+            #print stdout
+            #print stderr
+            raise SimuliationError("Solver execution failed: \
+            '{0}' output: {1}{2}".format(cmd,stdout,stderr))
+
         # Get data using solver specific function
         try:
             trajectories = self.get_trajectories(outdir, debug=debug)
         except Exception as e:
             raise SimulationError("Error using solver.get_trajectories('{0}'): {1}".format(outdir, e))
+
+        if len(trajectories) == 0:
+            #print stdout
+            #print stderr
+            raise SimuliationError("Solver execution failed: \
+            '{0}' output: {1}{2}".format(cmd,stdout,stderr))
+
         # Clean up
         if debug:
             print "prefix_basedir={0}".format(prefix_basedir)
+            print "STDOUT: {0}".format(stdout)
+            print "STDERR: {0}".format(stderr)
         else:
             shutil.rmtree(prefix_basedir)
         # Return data
