@@ -29,12 +29,10 @@ os.remove(tmp.name)
 ######
 
 
-# In[3]:
+dresults = sbml_model.run(solver=gillespy.StochKitODESolver)
 
-dresults = sbml_model.run(solver=gillespy.StochKitODESolver,stochkit_home="/Applications/StochSS-1.6/StochSSserver.app/Contents/Resources/ode/", debug=True)
+$^{-/-}$
 
-
-# In[4]:
 
 ns = len(sbml_model.listOfSpecies)
 plt.figure(figsize=(15,4*int(ceil(ns/5.0))))
@@ -44,8 +42,6 @@ for n,s in enumerate(sbml_model.listOfSpecies):
     plt.title(s)
 
 
-# In[5]:
-
 sbml_model.name
 
 
@@ -54,8 +50,6 @@ sbml_model.name
 for r in sbml_model.listOfReactions:
     print "{0}\t{1}".format(r,sbml_model.listOfReactions[r].propensity_function)
 
-
-# In[39]:
 
 new_rxns = []
 for rname in sbml_model.listOfReactions:
@@ -79,25 +73,17 @@ for rname in sbml_model.listOfReactions:
 print new_rxns
 
 
-# In[8]:
-
 for s in sbml_model.listOfSpecies:
     print s,sbml_model.listOfSpecies[s].initial_value
 
-
-# In[78]:
 
 r = model.listOfReactions['reaction_0000001']
 print r.propensity_function
 print r.propensity_function.replace('(','').replace(')','').split()
 
 
-# In[9]:
-
 sbml_model.listOfReactions
 
-
-# In[42]:
 
 '''If we assume the volume is 1.0, we can use the existing propensity 
 functions when we convert to a stochastic model.'''
@@ -133,13 +119,9 @@ class Markevich2004_MAPK_phosphoRandomElementary(gillespy.Model):
         self.add_reaction(new_rxns)
 
 
-# In[43]:
-
 stoch_model = Markevich2004_MAPK_phosphoRandomElementary(sbml_model)
 sresults = stoch_model.run(stochkit_home="/Applications/StochSS-1.6/StochSSserver.app/Contents/Resources/StochKit/", debug=True)
 
-
-# In[44]:
 
 ns = len(stoch_model.listOfSpecies)
 plt.figure(figsize=(15,4*int(ceil(ns/5.0))))
