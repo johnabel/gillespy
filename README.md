@@ -25,11 +25,11 @@ Installation instructions are provided for Linux Ubuntu and OSX.
 
 If StochSS or StochKit is installed, GillesPy must be pointed to the solver locations. This is done during the installation, through setting a SUDO environment variable depending on whether you have StochSS or StochKit.
 
-For StochSS, set the variable STOCHSS_HOME while in the SUDO environment. On a linux Ubuntu system, with StochSS 1.4.1 install in your home directory:
+For StochSS, set the variable STOCHSS_HOME while in the SUDO environment. On a linux Ubuntu system, with StochSS 1.6 installed in your home directory:
 ```
   git clone https://github.com/JohnAbel/gillespy.git
   cd gillespy
-  sudo STOCHSS_HOME=$HOME/stochss.linux.1.4.1/ python setup.py install
+  sudo STOCHSS_HOME=$HOME/stochss.linux.1.6/ python setup.py install
 ```
 
 Note: simply using export STOCHSS_HOME will not provide a SUDO environment variable.
