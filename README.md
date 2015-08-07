@@ -27,7 +27,7 @@ If StochSS or StochKit is installed, GillesPy must be pointed to the solver loca
 
 For StochSS, set the variable STOCHSS_HOME while in the SUDO environment. On a linux Ubuntu system, with StochSS 1.6 installed in your home directory:
 ```
-  git clone https://github.com/JohnAbel/gillespy.git
+  git clone https://github.com/GillesPy/gillespy.git
   cd gillespy
   sudo STOCHSS_HOME=$HOME/stochss.linux.1.6/ python setup.py install
 ```
@@ -36,7 +36,7 @@ Note: simply using export STOCHSS_HOME will not provide a SUDO environment varia
 
 If StochKit is installed, this process is similar, but instead set the environment variable STOCHKIT_HOME:
 ```
-  git clone https://github.com/JohnAbel/gillespy.git
+  git clone https://github.com/GillesPy/gillespy.git
   cd gillespy
   sudo STOCHKIT_HOME=$HOME/StochKit2.0.10/ python setup.py install
 ```
@@ -50,11 +50,11 @@ As of this time, if only StochKit is installed, the StochKitODE solver is inacce
 ##### OSX
 If StochSS or StochKit is installed, GillesPy must be pointed to the solver locations. This is done during the installation, through setting a SUDO environment variable depending on whether you have StochSS or StochKit.
 
-For StochSS, set the variable STOCHSS_HOME while in the SUDO environment. On OSX, if you have StochSS 1.4.1 installed in your Applications directory, then you would:
+For StochSS, set the variable STOCHSS_HOME while in the SUDO environment. On OSX, if you have StochSS 1.6 installed in your Applications directory, then you would:
 ```
-  git clone https://github.com/JohnAbel/gillespy.git
+  git clone https://github.com/GillesPy/gillespy.git
   cd gillespy
-  sudo STOCHSS_HOME=/Applications/StochSS-1.4.1/StochSSserver.app/Contents/Resources/ python setup.py install
+  sudo STOCHSS_HOME=/Applications/StochSS-1.6/StochSSserver.app/Contents/Resources/ python setup.py install
 ```
 
 ##### OSX (without StochSS)
@@ -66,7 +66,7 @@ Note: simply using export STOCHSS_HOME will not provide a SUDO environment varia
 
 If StochKit is installed, this process is similar, but instead set the environment variable STOCHKIT_HOME:
 ```
-  git clone https://github.com/JohnAbel/gillespy.git
+  git clone https://github.com/GillesPy/gillespy.git
   cd gillespy
   sudo STOCHKIT_HOME=/Applications/StochKit2.0.10/ python setup.py install
 ```
