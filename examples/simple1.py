@@ -3,7 +3,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 import sys
-sys.path.append('../')
+sys.path[:0] = ['..']
 
 import gillespy
 
@@ -32,6 +32,7 @@ class Simple1(gillespy.Model):
                 products = {},
                 rate = k1 )
         self.add_reaction(rxn1)
+        self.timespan(np.linspace(0,20,101))
 
 
 
@@ -44,8 +45,7 @@ if __name__ == '__main__':
     # The model object is simulated with the StochKit solver, and 25 
     # trajectories are returned.
     num_trajectories = 250
-    simple_trajectories = gillespy.StochKitSolver.run(simple_model, 
-            number_of_trajectories = num_trajectories)
+    simple_trajectories = simple_model.run(number_of_trajectories = num_trajectories)
     
 
 
