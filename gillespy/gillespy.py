@@ -94,8 +94,9 @@ class Model(object):
         self.namespace = OrderedDict([])
         
         # These are defaults for simulation, and yes it is a bit weired to have them here.
-        self.t = 20
-        self.increment = 0.05
+        #self.t = 20
+        #self.increment = 0.05
+        self.timespan(numpy.linspace(0,20,401))
         
     
     def serialize(self):
@@ -238,14 +239,14 @@ class Model(object):
     def delete_all_reactions(self):
         self.listOfReactions.clear()
 
-    def run(self, number_of_trajectories=1, seed=None, report_level=0, solver=None, stochkit_home=None):
+    def run(self, number_of_trajectories=1, seed=None, report_level=0, solver=None, stochkit_home=None, debug=False):
         if solver is not None:
             if isinstance(solver, (type, types.ClassType)) and  issubclass(solver, GillesPySolver):
-                return solver.run(self,t=self.tspan[-1],increment=self.tspan[-1]-self.tspan[-2],seed=seed,number_of_trajectories=number_of_trajectories, stochkit_home=stochkit_home)
+                return solver.run(self,t=self.tspan[-1],increment=self.tspan[-1]-self.tspan[-2],seed=seed,number_of_trajectories=number_of_trajectories, stochkit_home=stochkit_home, debug=debug)
             else:
                 raise SimuliationError('argument "solver" to run() must be a subclass of GillesPySolver')
         else:
-            return StochKitSolver.run(self,t=self.tspan[-1],increment=self.tspan[-1]-self.tspan[-2],seed=seed,number_of_trajectories=number_of_trajectories, stochkit_home=stochkit_home)
+            return StochKitSolver.run(self,t=self.tspan[-1],increment=self.tspan[-1]-self.tspan[-2],seed=seed,number_of_trajectories=number_of_trajectories, stochkit_home=stochkit_home, debug=debug)
 
 
 class Species():
@@ -819,7 +820,7 @@ class GillesPySolver():
 
     def run(self, model, t=20, number_of_trajectories=1,
             increment=0.05, seed=None, stochkit_home=None, algorithm=None,
-            job_id=None, extra_args=''):
+            job_id=None, extra_args='', debug=False):
         """ 
         Call out and run the solver. Collect the results.
         """
@@ -905,6 +906,8 @@ class GillesPySolver():
         # If we are using local mode, shell out and run StochKit 
         # (SSA or Tau-leaping or ODE)
         cmd = executable+' '+args+' '+extra_args
+        if debug:
+            print "cmd: {0}".format(cmd)
 
         # Execute
         try:
@@ -922,11 +925,14 @@ class GillesPySolver():
         
         # Get data using solver specific function
         try:
-            trajectories = self.get_trajectories(outdir)
+            trajectories = self.get_trajectories(outdir, debug=debug)
         except Exception as e:
             raise SimulationError("Error using solver.get_trajectories('{0}'): {1}".format(outdir, e))
         # Clean up
-        shutil.rmtree(prefix_basedir)
+        if debug:
+            print "prefix_basedir={0}".format(prefix_basedir)
+        else:
+            shutil.rmtree(prefix_basedir)
         # Return data
         return trajectories
 
@@ -936,7 +942,7 @@ class StochKitSolver(GillesPySolver):
     @classmethod
     def run(cls, model, t=20, number_of_trajectories=1,
             increment=0.05, seed=None, stochkit_home=None, algorithm='ssa',
-            job_id=None, method=None):
+            job_id=None, method=None,debug=False):
     
         # all this is specific to StochKit
         if model.units == "concentration":
@@ -968,9 +974,9 @@ class StochKitSolver(GillesPySolver):
 
         
         self = StochKitSolver()
-        return GillesPySolver.run(self, model,t, number_of_trajectories, increment, seed, stochkit_home, algorithm, job_id, extra_args=args)
+        return GillesPySolver.run(self, model,t, number_of_trajectories, increment, seed, stochkit_home, algorithm, job_id, extra_args=args, debug=debug)
 
-    def get_trajectories(self, outdir):
+    def get_trajectories(self, outdir, debug=False):
         # Collect all the output data
         files = os.listdir(outdir + '/stats')
         trajectories = []
@@ -991,11 +997,13 @@ class StochKitODESolver(GillesPySolver):
     @classmethod
     def run(cls, model, t=20, number_of_trajectories=1,
             increment=0.05, seed=None, stochkit_home=None, algorithm='stochkit_ode.py',
-            job_id=None):
+            job_id=None, debug=False):
         self = StochKitODESolver()
-        return GillesPySolver.run(self,model,t, number_of_trajectories, increment, seed, stochkit_home, algorithm, job_id)
+        return GillesPySolver.run(self,model,t, number_of_trajectories, increment, seed, stochkit_home, algorithm, job_id, debug=debug)
 
-    def get_trajectories(self, outdir):
+    def get_trajectories(self, outdir, debug=False):
+        if debug:
+            print "StochKitODESolver.get_trajectories(outdir={0}".format(outdir)
         # Collect all the output data
         trajectories = []
         with open(outdir + '/output.txt') as fd:
