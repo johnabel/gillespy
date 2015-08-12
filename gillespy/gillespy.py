@@ -48,7 +48,7 @@ def import_SBML(filename, name=None, gillespy_model=None):
     simulation"""
     
     try:
-        from SBMLimport import convert
+        from gillespy.SBMLimport import convert
     except ImportError:
         raise ImportError('SBML conversion not imported successfully')
         
