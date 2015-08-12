@@ -65,7 +65,7 @@ class easy_install_new(easy_install):
 
 
 setup(name = "gillespy",
-      version = "0.1",
+      version = "1.0",
       packages = ['gillespy'],
       description = 'Python interface to the Gillespie StochKit2 solvers',
       
