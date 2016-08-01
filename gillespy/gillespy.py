@@ -137,6 +137,8 @@ class Model(object):
                     raise ModelError("Can't add species. A species with that \
                                         name alredy exisits.")
                 self.listOfSpecies[S.name] = S;
+        return obj
+
     
     def delete_species(self, obj):
         self.listOfSpecies.pop(obj)        
@@ -173,6 +175,7 @@ class Model(object):
                 self.listOfParameters[params.name] = params
             else:
                 raise
+        return params
 
     def delete_parameter(self, obj):
         self.listOfParameters.pop(obj)
@@ -212,6 +215,7 @@ class Model(object):
                 self.listOfReactions[reacs.name] = reacs
         else:
             raise
+        return reacs
 
     def timespan(self, tspan):
         """ Set the time span of simulation. Since StochKit does not support 
