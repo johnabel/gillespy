@@ -318,7 +318,7 @@ class Reaction():
     """
 
     def __init__(self, name = "", reactants = {}, products = {}, 
-                 propensity_function = None, massaction = False, 
+                 propensity_function = None, massaction = True, 
                  rate=None, annotation=None):
         """ 
         Initializes the reaction using short-hand notation. 
@@ -343,8 +343,8 @@ class Reaction():
         self.name = name
         self.annotation = ""
         
-        if rate is None and propensity_function is None:
-            raise ReactionError("You must specify either a mass-action rate or a propensity function")
+        #if rate is None and propensity_function is None:
+        #    raise ReactionError("You must specify either a mass-action rate or a propensity function")
 
         # We might use this flag in the future to automatically generate
         # the propensity function if set to True.
@@ -378,10 +378,12 @@ class Reaction():
         if self.massaction:
             self.type = "mass-action"
             if rate is None:
-                raise ReactionError("Reaction : A mass-action propensity has\
-                 to have a rate.")
-            self.marate = rate
-            self.create_mass_action()
+		self.marate=None
+            #    raise ReactionError("Reaction : A mass-action propensity has\
+            #     to have a rate.")
+	    else:
+            	self.marate = rate
+            	self.create_mass_action()
         else:
             self.type = "customized"
                 
@@ -642,6 +644,9 @@ class StochMLDocument():
                 type = reac.find('Type').text
             except:
                 raise InvalidStochMLError("No reaction type specified.")
+
+            #reaction  = Reaction(name,{},{},None,False,0.0,None)                                                         
+
                     
             reactants  = reac.find('Reactants')
             try:
