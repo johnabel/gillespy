@@ -475,8 +475,34 @@ class Reaction():
     function needs to be evaluable (and result in a non-negative scalar 
     value) in the namespace defined by the union of those dicts.
     
-    Atributes
-    ---------
+    Attributes
+    ----------
+    name : str
+        The name by which the reaction is called.
+    reactants : dict
+        The reactants that are consumed in the reaction, with stoichiometry. An
+        example would be {R1 : 1, R2 : 2} if the reaction consumes two of R1 and    
+        one of R2, where R1 and R2 are Species objects.
+    products : dict
+        The species that are created by the reaction event, with stoichiometry. 
+        Same format as reactants.
+    propensity_function : str
+        The custom propensity fcn for the reaction. Must be evaluable in the    
+        namespace of the reaction using C operations.
+    massaction : bool
+        The switch to use a mass-action reaction. If set to True, a rate value
+        is required.
+    rate : float
+        The rate of the mass-action reaction. Take care to note the units...
+    annotation : str
+        
+    Notes
+    ----------
+    For a species that is NOT consumed in the reaction but is part of a mass 
+    action reaction, add it as both a reactant and a product.
+    
+    Mass-action reactions must also have a rate term added. Note that the rate 
+    must be scaled by the volume prior to being added for unit consistency.
     """
 
     def __init__(self, name = "", reactants = {}, products = {}, 
@@ -491,7 +517,8 @@ class Reaction():
         self.annotation = ""
         
         if rate is None and propensity_function is None:
-            raise ReactionError("You must specify either a mass-action rate or a propensity function")
+            raise ReactionError("You must specify either a mass-action rate or"+
+                                " a propensity function")
 
         # We might use this flag in the future to automatically generate
         # the propensity function if set to True.
@@ -503,7 +530,8 @@ class Reaction():
 
         self.propensity_function = propensity_function
         if self.propensity_function is not None and self.massaction:
-            errmsg = "Reaction "+self.name +" You cannot set the propensity type to mass-action and simultaneously set a propensity function."
+            errmsg = "Reaction "+self.name +" You cannot set the propensity "+
+            "type to mass-action and simultaneously set a propensity function."
             raise ReactionError(errmsg)
         
         self.reactants = {}
@@ -512,7 +540,7 @@ class Reaction():
             if rtype=='instance':
                 self.reactants[r.name] = reactants[r]
             else:
-                self.reactants[r]=reactants[r]
+                self.reactants[r] = reactants[r]
     
         self.products = {}
         for p in products:
@@ -520,7 +548,7 @@ class Reaction():
             if rtype=='instance':
                 self.products[p.name] = products[p]
             else:
-                self.products[p]=products[p]
+                self.products[p] = products[p]
 
         if self.massaction:
             self.type = "mass-action"
