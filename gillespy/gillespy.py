@@ -50,9 +50,20 @@ import pdb
 
 
 def import_SBML(filename, name=None, gillespy_model=None):
-    """ SBML to GillesPy model converter. NOTE: non-mass-action rates
+    """
+    SBML to GillesPy model converter. NOTE: non-mass-action rates
     in terms of concentrations may not be converted for population 
-    simulation"""
+    simulation. Use caution when importing SBML.
+    
+    Attributes
+    ----------
+    filename : str
+        Path to the SBML file for conversion.
+    name : str
+        Name of the resulting model.
+    gillespy_model : gillespy.Model
+        If desired, the SBML model may be added to an existing GillesPy model.
+    """
     
     try:
         from gillespy.SBMLimport import convert
@@ -357,12 +368,13 @@ class Model(object):
         number_of_trajectories : int
             The number of times to sample the chemical master equation. Each
             trajectory will be returned at the end of the simulation.
+            Optional, defaults to 1.
         seed : int
-            The random seed for the simulation. Defaults to None.
-        solver : GillesPySolver
-            The solver by which to simulate the model. Direct method, optimized 
-            direct method, tau-leaping, and deterministic solvers are included. 
-            See the solvers themselves for more information.
+            The random seed for the simulation. Optional, defaults to None.
+        solver : gillespy.GillesPySolver
+            The solver by which to simulate the model. This solver object may
+            be initialized separately to specify an algorithm. Optional, 
+            defulats to StochKitSolver SSA.
         stochkit_home : str
             Path to stochkit. This is set automatically upon installation, but 
             may be overwritten if desired.
@@ -371,14 +383,15 @@ class Model(object):
             simulation.
         """
         if solver is not None:
-            if isinstance(solver, (type, types.ClassType)) and  issubclass(solver, GillesPySolver):
+            if (isinstance(solver, (type, types.ClassType)) 
+                                and  issubclass(solver, GillesPySolver)):
                 return solver.run(self, t=self.tspan[-1], 
                             increment=self.tspan[-1]-self.tspan[-2], seed=seed, 
                             number_of_trajectories=number_of_trajectories,
                             stochkit_home=stochkit_home, debug=debug)
             else:
-                raise SimuliationError('argument "solver" to run() must be"+
-                                    " a subclass of GillesPySolver')
+                raise SimuliationError("argument 'solver' to run() must be"+
+                                    " a subclass of GillesPySolver")
         else:
             return StochKitSolver.run(self, t=self.tspan[-1], 
                             increment=self.tspan[-1]-self.tspan[-2], seed=seed, 
@@ -401,7 +414,7 @@ class Species():
         the type will be changed when it is added by numpy.int
     """
     
-    def __init__(self,name="",initial_value=0):
+    def __init__(self, name="", initial_value=0):
         # A species has a name (string) and an initial value (positive integer)
         self.name = name
         self.initial_value = np.int(initial_value)
@@ -426,7 +439,7 @@ class Parameter():
         Value of a parameter if it is not dependent on other Model entities.
     """
 
-    def __init__(self,name="",expression=None,value=None):
+    def __init__(self, name="", expression=None, value=None):
 
         self.name = name        
         # We allow expression to be passed in as a non-string type. Invalid strings
@@ -447,14 +460,26 @@ class Parameter():
         if self.value == None:
             self.evaluate()
     
-    def evaluate(self,namespace={}):
-        """ Evaluate the expression and return the (scalar) value """
+    def evaluate(self, namespace={}):
+        """ 
+        Evaluate the expression and return the (scalar) value in the given 
+        namespace.
+        
+        Attributes
+        ----------
+        namespace : dict (optional)
+            The namespace in which to test evaluation of the parameter, if it
+            involves other parameters, etc.
+        """
         try:
             self.value = (float(eval(self.expression, namespace)))
         except:
             self.value = None
             
-    def set_expression(self,expression):
+    def set_expression(self, expression):
+        """
+        Sets the expression for a parameter.
+        """
         self.expression = expression
         # We allow expression to be passed in as a non-string type. Invalid
         # strings will be caught below. It is perfectly fine to give a scalar 
@@ -495,6 +520,7 @@ class Reaction():
     rate : float
         The rate of the mass-action reaction. Take care to note the units...
     annotation : str
+        An optional note about the reaction.
         
     Notes
     ----------
@@ -530,8 +556,9 @@ class Reaction():
 
         self.propensity_function = propensity_function
         if self.propensity_function is not None and self.massaction:
-            errmsg = "Reaction "+self.name +" You cannot set the propensity "+
+            errmsg = ("Reaction "+self.name +" You cannot set the propensity "+
             "type to mass-action and simultaneously set a propensity function."
+            )
             raise ReactionError(errmsg)
         
         self.reactants = {}
@@ -562,8 +589,8 @@ class Reaction():
                 
     def create_mass_action(self):
         """ 
-            Create a mass action propensity function given
-            self.reactants and a single parameter value.
+        Initializes the mass action propensity function given
+        self.reactants and a single parameter value.
         """
         # We support zeroth, first and second order propensities only.
         # There is no theoretical justification for higher order propensities.
@@ -597,23 +624,59 @@ class Reaction():
 
         self.propensity_function = propensity_function
             
-    def setType(self,type):
-        if type.lower() not in {'mass-action','customized'}:
+    def setType(self, rxntype):
+        """
+        Sets reaction type to either "mass-action" or "customized"
+        
+        Attributes
+        ----------
+        rxntype : str
+            Either "mass-action" or "customized"
+        """
+        if rxntype.lower() not in {'mass-action','customized'}:
             raise ReactionError("Invalid reaction type.")
-        self.type = type.lower()
+        self.type = rxntype.lower()
 
         self.massaction = False if self.type == 'customized' else True
     
-    def addReactant(self,S,stoichiometry):
+    def addReactant(self, S, stoichiometry):
+        """
+        Adds a reactant to the reaction (species that is consumed)
+        
+        Attributes
+        ----------
+        S : gillespy.Species
+            Reactant to add to this reaction.
+        stoichiometry : int
+            The stoichiometry of the given reactant.
+        """
         if stoichiometry <= 0:
             raise ReactionError("Reaction Stoichiometry must be a \
                                     positive integer.")
         self.reactants[S.name]=stoichiometry
 
-    def addProduct(self,S,stoichiometry):
+    def addProduct(self, S, stoichiometry):
+        """
+        Adds a product to the reaction (species that is created)
+        
+        Attributes
+        ----------
+        S : gillespy.Species
+            Product to add to this reaction.
+        stoichiometry : int
+            The stoichiometry of the given product.
+        """
         self.products[S.name]=stoichiometry
 
-    def Annotate(self,annotation):
+    def Annotate(self, annotation):
+        """
+        Adds a note to the reaction
+        
+        Attributes
+        ----------
+        annotation : str
+            An optional note about the reaction.
+        """
         self.annotation = annotation
 
 
@@ -642,20 +705,22 @@ class StochMLDocument():
     
     @classmethod
     def from_model(cls,model):
-        """ Creates an StochKit XML document from an exisiting Mdoel object.
-            This method assumes that all the parameters in the model are already resolved
-            to scalar floats (see Model.resolveParamters). 
-                
-            Note, this method is intended to be used interanally by the models 'serialization' 
-            function, which performs additional operations and tests on the model prior to 
-            writing out the XML file. You should NOT do 
+        """ 
+        Creates an StochKit XML document from an exisiting Mdoel object.
+        This method assumes that all the parameters in the model are already 
+        resolved to scalar floats (see Model.resolveParamters). 
             
-            document = StochMLDocument.fromModel(model)
-            print document.toString()
-            
-            you SHOULD do
-            
-            print model.serialize()            
+        Note, this method is intended to be used interanally by the models 
+        'serialization' function, which performs additional operations and 
+        tests on the model prior to writing out the XML file. You should NOT \
+        do: 
+        
+        document = StochMLDocument.fromModel(model)
+        print document.toString()
+        
+        You SHOULD do
+        
+        print model.serialize()            
             
         """
         
@@ -991,7 +1056,40 @@ class StochMLDocument():
 
 
 class GillesPySolver():
-    ''' abstract class for simulation methods '''
+    """ 
+    Abstract class for a solver. This is generally called from within a
+    gillespy Model through the Model.run function. Returns simulation 
+    trajectories.
+        
+    Attributes
+    ----------
+    model : gillespy.Model
+        The model on which the solver will operate.
+    t : float
+        The end time of the solver.
+    number_of_trajectories : int
+        The number of times to sample the chemical master equation. Each
+        trajectory will be returned at the end of the simulation.
+    increment : float
+        The time step of the solution.
+    seed : int
+        The random seed for the simulation. Defaults to None.
+    stochkit_home : str
+        Path to stochkit. This is set automatically upon installation, but 
+        may be overwritten if desired.
+    algorithm : str
+        The solver by which to simulate the model. 'ssa' or 'tau_leaping'
+        are the available options. If 'ssa' is chosen, StochKit will choose
+        from the available ssa options.
+    job_id : str
+        If given, this will be the name of the solver run. Usually not set.
+    extra_args : str
+        Any extra arguments for the stochkit solver. See StochKit2 
+        documentation for details.
+    debug : bool (False)
+        Set to True to provide additional debug information about the     
+        simulation.
+    """
 
     def run(self, model, t=20, number_of_trajectories=1,
             increment=0.05, seed=None, stochkit_home=None, algorithm=None,
@@ -1013,7 +1111,8 @@ class GillesPySolver():
         
         # Write a temporary StochKit2 input file.
         if isinstance(model, Model):
-            outfile =  os.path.join(prefix_basedir, "temp_input_"+job_id+".xml")
+            outfile =  os.path.join(prefix_basedir, 
+                                        "temp_input_"+job_id+".xml")
             mfhandle = open(outfile, 'w')
             #document = StochMLDocument.from_model(model)
 
@@ -1131,7 +1230,38 @@ class GillesPySolver():
         return trajectories
 
 class StochKitSolver(GillesPySolver):
-    ''' Solver class to simulate Stochastically with StockKit. '''
+    """ 
+    Abstract class for StochKit solver derived from the GillesPySolver class.
+    This is generally used to set up the solver.
+        
+    Attributes
+    ----------
+    model : gillespy.Model
+        The model on which the solver will operate.
+    t : float
+        The end time of the solver.
+    number_of_trajectories : int
+        The number of times to sample the chemical master equation. Each
+        trajectory will be returned at the end of the simulation.
+    increment : float
+        The time step of the solution.
+    seed : int
+        The random seed for the simulation. Defaults to None.
+    stochkit_home : str
+        Path to stochkit. This is set automatically upon installation, but 
+        may be overwritten if desired.
+    algorithm : str
+        The solver by which to simulate the model. 'ssa' or 'tau_leaping'
+        are the available options. If 'ssa' is chosen, StochKit will choose
+        from the available ssa options.
+    job_id : str
+        If given, this will be the name of the solver run. Usually not set.
+    method : str
+        The specific SSA to call. NOT YET FUNCTIONAL.
+    debug : bool (False)
+        Set to True to provide additional debug information about the     
+        simulation.
+    """
     
     @classmethod
     def run(cls, model, t=20, number_of_trajectories=1,
@@ -1140,7 +1270,10 @@ class StochKitSolver(GillesPySolver):
     
         # all this is specific to StochKit
         if model.units == "concentration":
-            raise SimuliationError("StochKit can only simulate population models, please convert to population-based model for stochastic simulation. Use solver = StochKitODESolver instead to simulate a concentration model deterministically.")
+            raise SimuliationError("StochKit can only simulate population "+
+                "models, please convert to population-based model for "+
+                "stochastic simulation. Use solver = StochKitODESolver "+
+                "instead to simulate a concentration model deterministically.")
 
         if seed is None:
             seed = random.randint(0, 2147483647)
@@ -1168,7 +1301,9 @@ class StochKitSolver(GillesPySolver):
 
         
         self = StochKitSolver()
-        return GillesPySolver.run(self, model,t, number_of_trajectories, increment, seed, stochkit_home, algorithm, job_id, extra_args=args, debug=debug)
+        return GillesPySolver.run(self, model,t, number_of_trajectories, 
+                                  increment, seed, stochkit_home, algorithm, 
+                                  job_id, extra_args=args, debug=debug)
 
     def get_trajectories(self, outdir, debug=False):
         # Collect all the output data
@@ -1186,14 +1321,44 @@ class StochKitSolver(GillesPySolver):
 
 
 class StochKitODESolver(GillesPySolver):
-    ''' Solver class to simulate deterministically with StockKitODE. '''
+        """ 
+    Abstract class for StochKit solver derived from the GillesPySolver class.
+    This is generally used to set up the solver.
+        
+    Attributes
+    ----------
+    model : gillespy.Model
+        The model on which the solver will operate.
+    t : float
+        The end time of the solver.
+    number_of_trajectories : int
+        The number of times to sample the chemical master equation. Each
+        trajectory will be returned at the end of the simulation.
+    increment : float
+        The time step of the solution.
+    seed : int
+        The random seed for the simulation. Defaults to None.
+    stochkit_home : str
+        Path to stochkit. This is set automatically upon installation, but 
+        may be overwritten if desired.
+    algorithm : str
+        Already set to 'stochkit_ode.py'
+    job_id : str
+        If given, this will be the name of the solver run. Usually not set.
+    debug : bool (False)
+        Set to True to provide additional debug information about the     
+        simulation.
+    """
     
     @classmethod
     def run(cls, model, t=20, number_of_trajectories=1,
-            increment=0.05, seed=None, stochkit_home=None, algorithm='stochkit_ode.py',
+            increment=0.05, seed=None, stochkit_home=None, 
+            algorithm='stochkit_ode.py',
             job_id=None, debug=False):
         self = StochKitODESolver()
-        return GillesPySolver.run(self,model,t, number_of_trajectories, increment, seed, stochkit_home, algorithm, job_id, debug=debug)
+        return GillesPySolver.run(self,model,t, number_of_trajectories, 
+                                  increment, seed, stochkit_home, algorithm, 
+                                  job_id, debug=debug)
 
     def get_trajectories(self, outdir, debug=False):
         if debug:
