@@ -1321,7 +1321,7 @@ class StochKitSolver(GillesPySolver):
 
 
 class StochKitODESolver(GillesPySolver):
-        """ 
+    """ 
     Abstract class for StochKit solver derived from the GillesPySolver class.
     This is generally used to set up the solver.
         
@@ -1352,9 +1352,9 @@ class StochKitODESolver(GillesPySolver):
     
     @classmethod
     def run(cls, model, t=20, number_of_trajectories=1,
-            increment=0.05, seed=None, stochkit_home=None, 
-            algorithm='stochkit_ode.py',
-            job_id=None, debug=False):
+                increment=0.05, seed=None, stochkit_home=None, 
+                algorithm='stochkit_ode.py',
+                job_id=None, debug=False):
         self = StochKitODESolver()
         return GillesPySolver.run(self,model,t, number_of_trajectories, 
                                   increment, seed, stochkit_home, algorithm, 
