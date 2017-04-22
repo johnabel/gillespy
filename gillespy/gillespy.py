@@ -73,7 +73,6 @@ def import_SBML(filename, name=None, gillespy_model=None):
     return convert(filename, modelName = name, gillespy_model = gillespy_model)
 
 
-
 class Model(object):
     """
     Representation of a well mixed biochemical model. Contains reactions,
@@ -126,7 +125,7 @@ class Model(object):
         # evaluation of expressions in the scope of the model.
         self.namespace = OrderedDict([])
         
-        if timespan is None:
+        if tspan is None:
             self.timespan(numpy.linspace(0,20,401))
         else: self.timespan(tspan)
         
