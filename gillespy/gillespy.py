@@ -94,14 +94,16 @@ class Model(object):
     tspan : numpy ndarray
         The timepoints at which the model should be simulated. If None, a 
         default timespan is added. May be set later, see Model.timespan
-    
+    annotation : str (optional)
+        Optional further description of model
     """
     
-    def __init__(self, name="", population=True, volume=1.0, tspan=None):
+    def __init__(self, name="", population=True, volume=1.0, tspan=None, annotation="model"):
         """ Create an empty model. """
         
         # The name that the model is referenced by (should be a String)
         self.name = name
+        self.annotation = annotation
         
         # Dictionaries with Species, Reactions and Parameter objects.
         # Species, Reaction and Paramter names are used as keys.
