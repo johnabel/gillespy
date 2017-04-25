@@ -184,6 +184,8 @@ class Model(object):
                     raise ModelError("Can't add species. A species with that \
                                         name alredy exisits.")
                 self.listOfSpecies[S.name] = S;
+        return obj
+
     
     def delete_species(self, obj):
         """
@@ -257,6 +259,7 @@ class Model(object):
                 self.listOfParameters[params.name] = params
             else:
                 raise
+        return params
 
     def delete_parameter(self, obj):
         """
@@ -324,6 +327,7 @@ class Model(object):
                 self.listOfReactions[reacs.name] = reacs
         else:
             raise
+        return reacs
 
     def timespan(self, tspan):
         """ 
@@ -357,7 +361,7 @@ class Model(object):
         self.listOfReactions.clear()
 
     def run(self, number_of_trajectories=1, seed=None, 
-                  solver=None, stochkit_home=None, debug=False):
+                  solver=None, stochkit_home=None, debug=False, show_labels=True):
         """
         Function calling simulation of the model. There are a number of       
         parameters to be set here.
@@ -385,17 +389,21 @@ class Model(object):
             if (isinstance(solver, (type, types.ClassType)) 
                                 and  issubclass(solver, GillesPySolver)):
                 return solver.run(self, t=self.tspan[-1], 
-                            increment=self.tspan[-1]-self.tspan[-2], seed=seed, 
+                            increment=self.tspan[-1]-self.tspan[-2],
+                            seed=seed, 
                             number_of_trajectories=number_of_trajectories,
-                            stochkit_home=stochkit_home, debug=debug)
+                            stochkit_home=stochkit_home, debug=debug,
+                            show_labels=show_labels)
             else:
-                raise SimuliationError("argument 'solver' to run() must be"+
+                raise SimuliationError(
+                        "argument 'solver' to run() must be"+
                                     " a subclass of GillesPySolver")
         else:
-            return StochKitSolver.run(self, t=self.tspan[-1], 
-                            increment=self.tspan[-1]-self.tspan[-2], seed=seed, 
-                            number_of_trajectories=number_of_trajectories, 
-                            stochkit_home=stochkit_home, debug=debug)
+            return StochKitSolver.run(self,t=self.tspan[-1],
+                    increment=self.tspan[-1]-self.tspan[-2], seed=seed,
+                    number_of_trajectories=number_of_trajectories,
+                    stochkit_home=stochkit_home, debug=debug,
+                    show_labels=show_labels)
 
 
 class Species():
@@ -1092,7 +1100,7 @@ class GillesPySolver():
 
     def run(self, model, t=20, number_of_trajectories=1,
             increment=0.05, seed=None, stochkit_home=None, algorithm=None,
-            job_id=None, extra_args='', debug=False):
+            job_id=None, extra_args='', debug=False, show_labels=False):
         """ 
         Call out and run the solver. Collect the results.
         """
@@ -1208,7 +1216,10 @@ class GillesPySolver():
 
         # Get data using solver specific function
         try:
-            trajectories = self.get_trajectories(outdir, debug=debug)
+            if show_labels:
+                labels, trajectories = self.get_trajectories(outdir, debug=debug, show_labels=True)
+            else:
+                trajectories = self.get_trajectories(outdir, debug=debug, show_labels=False)
         except Exception as e:
             raise SimulationError("Error using solver.get_trajectories('{0}'): {1}".format(outdir, e))
 
@@ -1226,7 +1237,16 @@ class GillesPySolver():
         else:
             shutil.rmtree(prefix_basedir)
         # Return data
-        return trajectories
+        if show_labels:
+            results2 = []
+            for r in trajectories:
+                ret = {}
+                for n,l in enumerate(labels):
+                    ret[l] = r[:,n]
+                results2.append(ret)
+            return results2
+        else:
+            return trajectories
 
 class StochKitSolver(GillesPySolver):
     """ 
@@ -1265,7 +1285,7 @@ class StochKitSolver(GillesPySolver):
     @classmethod
     def run(cls, model, t=20, number_of_trajectories=1,
             increment=0.05, seed=None, stochkit_home=None, algorithm='ssa',
-            job_id=None, method=None,debug=False):
+            job_id=None, method=None,debug=False, show_labels=False):
     
         # all this is specific to StochKit
         if model.units == "concentration":
@@ -1287,6 +1307,7 @@ class StochKitSolver(GillesPySolver):
       
         # We keep all the trajectories by default.
         args += ' --keep-trajectories'
+        args += ' --label'
 
         args += ' --seed '
         args += str(seed)
@@ -1301,22 +1322,33 @@ class StochKitSolver(GillesPySolver):
         
         self = StochKitSolver()
         return GillesPySolver.run(self, model,t, number_of_trajectories, 
-                                  increment, seed, stochkit_home, algorithm, 
-                                  job_id, extra_args=args, debug=debug)
+                                  increment, seed, stochkit_home,
+                                  algorithm, 
+                                  job_id, extra_args=args, debug=debug,
+                                  show_labels=show_labels)
 
-    def get_trajectories(self, outdir, debug=False):
+
+    def get_trajectories(self, outdir, debug=False, show_labels=False):
         # Collect all the output data
         files = os.listdir(outdir + '/stats')
         trajectories = []
         files = os.listdir(outdir + '/trajectories')
+        labels = []
+        if show_labels:
+            with open(outdir + '/trajectories/trajectory0.txt', 'r') as f:
+                first_line= f.readline()
+                labels = first_line.split()
         for filename in files:
             if 'trajectory' in filename:
                 trajectories.append(numpy.loadtxt(outdir + '/trajectories/' + 
-                                        filename))
+                                        filename, skiprows=1))
             else:
                 raise SimuliationError("Couldn't identify file '{0}' found in \
                                         output folder".format(filename))
-        return trajectories
+        if show_labels:
+            return (labels, trajectories)
+        else:
+            return trajectories
 
 
 class StochKitODESolver(GillesPySolver):
@@ -1356,10 +1388,12 @@ class StochKitODESolver(GillesPySolver):
                 job_id=None, debug=False):
         self = StochKitODESolver()
         return GillesPySolver.run(self,model,t, number_of_trajectories, 
-                                  increment, seed, stochkit_home, algorithm, 
-                                  job_id, debug=debug)
+                                  increment, seed, stochkit_home,
+                                  algorithm, 
+                                  job_id, debug=debug,
+                                  show_labels=show_labels)
 
-    def get_trajectories(self, outdir, debug=False):
+    def get_trajectories(self, outdir, debug=False, show_labels=False):
         if debug:
             print "StochKitODESolver.get_trajectories(outdir={0}".format(outdir)
         # Collect all the output data
@@ -1374,7 +1408,10 @@ class StochKitODESolver(GillesPySolver):
             for line in fd:
                 data.append([float(x) for x in line.split()])
         trajectories.append(numpy.array(data))
-        return trajectories
+        if show_labels:
+            return (headers.split(), trajectories)
+        else:
+            return trajectories
 
 
 # Exceptions
