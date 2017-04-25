@@ -384,6 +384,8 @@ class Model(object):
         debug : bool (False)
             Set to True to provide additional debug information about the     
             simulation.
+        show_labels : bool (True)
+            Use names of species as index of result object rather than position numbers.
         """
         if solver is not None:
             if (isinstance(solver, (type, types.ClassType)) 
@@ -1096,6 +1098,8 @@ class GillesPySolver():
     debug : bool (False)
         Set to True to provide additional debug information about the     
         simulation.
+    show_labels : bool (True)
+        Use names of species as index of result object rather than position numbers.
     """
 
     def run(self, model, t=20, number_of_trajectories=1,
