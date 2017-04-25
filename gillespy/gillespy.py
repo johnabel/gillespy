@@ -857,7 +857,7 @@ class GillesPySolver():
 
         # Assemble argument list for StochKit
         ensemblename = job_id
-        
+    
         directories = os.listdir(prefix_outdir)
         
         
@@ -944,6 +944,18 @@ class GillesPySolver():
             else:
                 trajectories = self.get_trajectories(outdir, debug=debug, show_labels=False)
         except Exception as e:
+            fname = os.path.join(prefix_basedir,'temp_input_{0}_generated_code'.format(ensemblename),'compile-log.txt')
+            if os.path.isfile(fname):
+                with open(fname) as f:
+                    cerr = f.read()
+                raise SimulationError("Error compiling custom propensities: {0}\n{1}\n".format(fname,cerr))
+
+            fname = os.path.join(prefix_outdir,ensemblename,'log.txt')
+            if os.path.isfile(fname):
+                with open(fname) as f:
+                    cerr = f.read()
+                raise SimulationError("Error running simulation: {0}\n{1}\n".format(fname,cerr))
+            
             raise SimulationError("Error using solver.get_trajectories('{0}'): {1}".format(outdir, e))
 
         if len(trajectories) == 0:
