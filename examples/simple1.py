@@ -45,7 +45,7 @@ if __name__ == '__main__':
     # The model object is simulated with the StochKit solver, and 25 
     # trajectories are returned.
     num_trajectories = 250
-    simple_trajectories = simple_model.run(number_of_trajectories = num_trajectories)
+    simple_trajectories = simple_model.run(number_of_trajectories=num_trajectories, show_labels=False)
     
 
 
