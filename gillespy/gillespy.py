@@ -1403,7 +1403,7 @@ class StochKitODESolver(GillesPySolver):
     def run(cls, model, t=20, number_of_trajectories=1,
                 increment=0.05, seed=None, stochkit_home=None, 
                 algorithm='stochkit_ode.py',
-                job_id=None, debug=False):
+                job_id=None, debug=False, show_labels=False):
         self = StochKitODESolver()
         return GillesPySolver.run(self,model,t, number_of_trajectories, 
                                   increment, seed, stochkit_home,
