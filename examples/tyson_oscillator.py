@@ -91,7 +91,7 @@ if __name__ == '__main__':
     # =============================================  
     # To set up the model, first create an empty model object. Then, add
     # species and parameters as was set up above.
-    tyson_trajectories = tyson_model.run()
+    tyson_trajectories = tyson_model.run(show_labels=False)
     
     # =============================================  
     # plot just the first trajectory, 0, in both time and phase space:

@@ -74,8 +74,8 @@ if __name__ == '__main__':
     num_trajectories = 100
 
     # Let's simulate for both parameter sets, and compare the results
-    set1_trajectories = set1_model.run(number_of_trajectories = num_trajectories)
-    set2_trajectories = set2_model.run(number_of_trajectories = num_trajectories)
+    set1_trajectories = set1_model.run(number_of_trajectories = num_trajectories, show_labels=False)
+    set2_trajectories = set2_model.run(number_of_trajectories = num_trajectories, show_labels=False)
 
     # Done! That was simple.
 
