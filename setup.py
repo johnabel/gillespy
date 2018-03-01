@@ -36,8 +36,7 @@ def stoch_path(command_subclass):
         try:
             subprocess.check_call(cmd,shell=True)
         except(subprocess.CalledProcessError,OSError) as e:
-            print "It didn't work {0}".format(e)
-            raise SystemExit
+            raise Exception("It didn't work {0}".format(e))
         orig_run(self)
     command_subclass.run = modified_run
     return command_subclass
@@ -71,7 +70,8 @@ setup(name = "gillespy",
       
       install_requires = ["numpy",
                           "matplotlib",
-                          "scipy"],
+                          "scipy",
+                          "future"],
       
       author = "John H. Abel, Brian Drawert, Andreas Hellander",
       author_email = ["jhabel01@gmail.com", "briandrawert@gmail.com", "andreas.hellander@gmail.com"],

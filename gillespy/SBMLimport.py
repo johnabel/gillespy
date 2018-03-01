@@ -1,6 +1,8 @@
+from __future__ import print_function
+from __future__ import absolute_import
 
 import os
-import gillespy
+from . import gillespy
 import numpy
 
 def convert(filename, modelName = None, gillespy_model=None):
@@ -189,23 +191,25 @@ def convert(filename, modelName = None, gillespy_model=None):
 
 
 if __name__=='__main__':
+    from future.standard_library import install_aliases
+    install_aliases()
     import sys
-    import urllib2
+    import urllib.request, urllib.error, urllib.parse
     import tempfile
     
     sbml_list = ['http://www.ebi.ac.uk/biomodels-main/download?mid=BIOMD0000000054']
 
     for sbml_file in sbml_list:
-        print "Testing 'convert()' for {0}".format(sbml_file)
+        print("Testing 'convert()' for {0}".format(sbml_file))
         if sbml_file.startswith('http'):
-            response = urllib2.urlopen(sbml_file)
+            response = urllib.request.urlopen(sbml_file)
             tmp = tempfile.NamedTemporaryFile(delete = False)
             tmp.write(response.read())
             tmp.close()
             ######
             model, errors = convert(tmp.name)
-            print os.linesep.join([error for error, code in errors])
-            print "-----"
+            print(os.linesep.join([error for error, code in errors]))
+            print("-----")
             os.remove(tmp.name)
             ######
         else:
@@ -213,6 +217,6 @@ if __name__=='__main__':
                 raise Exception("Can not find file on disk '{0}'".format(sbml_file))
             ######
             model, errors = convert(sbml_file)
-            print os.linesep.join([error for error, code in errors])
+            print(os.linesep.join([error for error, code in errors]))
             ######
             

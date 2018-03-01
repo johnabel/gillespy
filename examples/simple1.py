@@ -1,3 +1,4 @@
+from builtins import range
 import scipy as sp
 import numpy as np
 import matplotlib.pyplot as plt
@@ -65,7 +66,7 @@ if __name__ == '__main__':
     time = np.array(simple_trajectories[0][:,0]) 
 
     # extract just the trajectories for S into a numpy array
-    S_trajectories = np.array([simple_trajectories[i][:,1] for i in xrange(num_trajectories)]).T
+    S_trajectories = np.array([simple_trajectories[i][:,1] for i in range(num_trajectories)]).T
     
     #plot individual trajectories
     ax0.plot(time, S_trajectories, 'gray', alpha = 0.1)
