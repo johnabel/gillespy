@@ -67,10 +67,10 @@ def import_SBML(filename, name=None, gillespy_model=None):
         If desired, the SBML model may be added to an existing GillesPy model.
     """
     
-    #try:
+    try:
     from .SBMLimport import convert
-    #except ImportError:
-    #    raise ImportError('SBML conversion not imported successfully')
+    except ImportError:
+        raise ImportError('SBML conversion not imported successfully')
         
     return convert(filename, modelName = name, gillespy_model = gillespy_model)
 
