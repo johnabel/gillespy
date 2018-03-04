@@ -11,6 +11,7 @@ format. This does not necessarily mean it is perfect, but it is certainly an
 improvement over the original.
     
 """
+from __future__ import division
 from __future__ import print_function
 from __future__ import absolute_import
 
