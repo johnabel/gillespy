@@ -12,6 +12,8 @@ improvement over the original.
     
 """
 from __future__ import division
+from __future__ import print_function
+from __future__ import absolute_import
 
 from collections import OrderedDict
 import scipy as sp
@@ -253,14 +255,14 @@ class Model(object):
             The parameter or list of parameters to be added to the model object.
         """
         # TODO, make sure that you don't overwrite an existing parameter??
-        if type(params).__name__=='list':
+        if isinstance(params, list):
             for p in params:
                 self.listOfParameters[p.name] = p
         else:
-            if type(params).__name__=='instance':
+            if isinstance(params, Parameter):
                 self.listOfParameters[params.name] = params
             else:
-                raise
+                raise Exception("params should be of type `Parameter` and is instead of type {}".format(type(params)))
         return params
 
     def delete_parameter(self, obj):
@@ -319,16 +321,15 @@ class Model(object):
         """
         
         # TODO, make sure that you cannot overwrite an existing reaction
-        param_type = type(reacs).__name__
-        if param_type == 'list':
+        if isinstance(reacs, list):
             for r in reacs:
                 self.listOfReactions[r.name] = r
-        elif param_type == 'dict' or param_type == 'OrderedDict':
+        elif isinstance(reacs, dict):
             self.listOfReactions = reacs
-        elif param_type == 'instance':
+        elif isinstance(reacs, Reaction):
                 self.listOfReactions[reacs.name] = reacs
         else:
-            raise
+            raise Exception("reacs should be a list, dict or Reaction and is instead a {}".format(type(reacs)))
         return reacs
 
     def timespan(self, tspan):
@@ -342,7 +343,7 @@ class Model(object):
         """
         
         items = numpy.diff(tspan)
-        items = map(lambda x: round(x, 10),items)
+        items = [round(x, 10) for x in items]
         isuniform = (len(set(items)) == 1)
         
         if isuniform:
@@ -390,7 +391,7 @@ class Model(object):
             Use names of species as index of result object rather than position numbers.
         """
         if solver is not None:
-            if (isinstance(solver, (type, types.ClassType)) 
+            if (isinstance(solver, type) 
                                 and  issubclass(solver, GillesPySolver)):
                 return solver.run(self, t=self.tspan[-1], 
                             increment=self.tspan[-1]-self.tspan[-2],
@@ -410,7 +411,7 @@ class Model(object):
                     show_labels=show_labels)
 
 
-class Species():
+class Species(object):
     """ 
     Chemical species. Can be added to Model object to interact with other     
     species or time.
@@ -574,16 +575,14 @@ class Reaction():
         
         self.reactants = {}
         for r in reactants:
-            rtype = type(r).__name__
-            if rtype=='instance':
+            if isinstance(r, Species):
                 self.reactants[r.name] = reactants[r]
             else:
                 self.reactants[r] = reactants[r]
     
         self.products = {}
         for p in products:
-            rtype = type(p).__name__
-            if rtype=='instance':
+            if isinstance(p, Species):
                 self.products[p.name] = products[p]
             else:
                 self.products[p] = products[p]
@@ -665,6 +664,7 @@ class Reaction():
             raise ReactionError("Reaction Stoichiometry must be a \
                                     positive integer.")
         self.reactants[S.name]=stoichiometry
+        print(self.reactants)
 
     def addProduct(self, S, stoichiometry):
         """
@@ -813,7 +813,7 @@ class StochMLDocument():
         if model.name is "":
             name = root.find('Name')
             if name.text is None:
-                raise
+                raise Exception("Model should have a name.")
             else:
                 model.name = name.text
         
@@ -908,7 +908,7 @@ class StochMLDocument():
                         # The sref list should only contain one element if 
                         # the XML file is valid.
                         reaction.reactants[specname] = stoch
-                    except Exception,e:
+                    except Exception as e:
                         StochMLImportError(e)
             except:
                 # Yes, this is correct. 'reactants' can be None
@@ -924,7 +924,7 @@ class StochMLDocument():
                         # The sref list should only contain one element if 
                         # the XML file is valid.
                         reaction.products[specname] = stoch
-                    except Exception,e:
+                    except Exception as e:
                         raise StochMLImportError(e)
             except:
                 # Yes, this is correct. 'products' can be None
@@ -941,7 +941,7 @@ class StochMLDocument():
                     ratename=reac.find('Rate').text
                     try:
                         reaction.marate = model.listOfParameters[ratename]
-                    except KeyError, k:
+                    except KeyError as k:
                         # No paramter name is given. This is a valid use case 
                         # in StochKit. We generate a name for the paramter, 
                         # and create a new parameter instance. The parameter's 
@@ -957,12 +957,12 @@ class StochMLDocument():
                                                 generated_rate_name]
 
                     reaction.create_mass_action()
-                except Exception, e:
+                except Exception as e:
                     raise
             elif type == 'customized':
                 try:
                     propfunc = reac.find('PropensityFunction').text
-                except Exception,e:
+                except Exception as e:
                     raise InvalidStochMLError("Found a customized " +
                     "propensity function, but no expression was given."+e)
                 reaction.propensity_function = propfunc
@@ -1047,7 +1047,7 @@ class StochMLDocument():
 
         reactants = etree.Element('Reactants')
 
-        for reactant, stoichiometry in R.reactants.items():
+        for reactant, stoichiometry in list(R.reactants.items()):
             srElement = etree.Element('SpeciesReference')
             srElement.set('id', reactant)
             srElement.set('stoichiometry', str(stoichiometry))
@@ -1056,7 +1056,7 @@ class StochMLDocument():
         e.append(reactants)
 
         products = etree.Element('Products')
-        for product, stoichiometry in R.products.items():
+        for product, stoichiometry in list(R.products.items()):
             srElement = etree.Element('SpeciesReference')
             srElement.set('id', product)
             srElement.set('stoichiometry', str(stoichiometry))
@@ -1126,7 +1126,7 @@ class GillesPySolver():
         if isinstance(model, Model):
             outfile =  os.path.join(prefix_basedir, 
                                         "temp_input_"+job_id+".xml")
-            mfhandle = open(outfile, 'w')
+            mfhandle = open(outfile, 'wb')
             #document = StochMLDocument.from_model(model)
 
         # If the model is a Model instance, we serialize it to XML,
@@ -1186,7 +1186,7 @@ class GillesPySolver():
         num_output_points = str(int(float(t/increment)))
         args += ' -i ' + num_output_points
         if ensemblename in directories:
-            print 'Ensemble '+ensemblename+' already existed, using --force.'
+            print('Ensemble '+ensemblename+' already existed, using --force.')
             args+=' --force'
         
 
@@ -1194,7 +1194,7 @@ class GillesPySolver():
         # (SSA or Tau-leaping or ODE)
         cmd = executable+' '+args+' '+extra_args
         if debug:
-            print "cmd: {0}".format(cmd)
+            print("cmd: {0}".format(cmd))
 
         # Execute
         try:
@@ -1249,9 +1249,9 @@ class GillesPySolver():
 
         # Clean up
         if debug:
-            print "prefix_basedir={0}".format(prefix_basedir)
-            print "STDOUT: {0}".format(stdout)
-            print "STDERR: {0}".format(stderr)
+            print("prefix_basedir={0}".format(prefix_basedir))
+            print("STDOUT: {0}".format(stdout))
+            print("STDERR: {0}".format(stderr))
         else:
             shutil.rmtree(prefix_basedir)
         # Return data
@@ -1413,7 +1413,7 @@ class StochKitODESolver(GillesPySolver):
 
     def get_trajectories(self, outdir, debug=False, show_labels=False):
         if debug:
-            print "StochKitODESolver.get_trajectories(outdir={0}".format(outdir)
+            print("StochKitODESolver.get_trajectories(outdir={0}".format(outdir))
         # Collect all the output data
         trajectories = []
         with open(outdir + '/output.txt') as fd:

@@ -1,3 +1,5 @@
+from builtins import range
+
 import scipy as sp
 import numpy as np
 import matplotlib.pyplot as plt
@@ -101,8 +103,8 @@ if __name__ == '__main__':
     # Plot for parameter set #1
     ax0 = plt.subplot(gs[0,0])
 
-    set1_S1 = np.array([set1_trajectories[i][:,1] for i in xrange(num_trajectories)]).T
-    set1_S2 = np.array([set2_trajectories[i][:,2] for i in xrange(num_trajectories)]).T
+    set1_S1 = np.array([set1_trajectories[i][:,1] for i in range(num_trajectories)]).T
+    set1_S2 = np.array([set2_trajectories[i][:,2] for i in range(num_trajectories)]).T
 
     
     #plot individual trajectories
@@ -121,8 +123,8 @@ if __name__ == '__main__':
     # Plot for parameter set #2
     ax1 = plt.subplot(gs[0,1])
 
-    set2_S1 = np.array([set2_trajectories[i][:,1] for i in xrange(num_trajectories)]).T
-    set2_S2 = np.array([set2_trajectories[i][:,2] for i in xrange(num_trajectories)]).T
+    set2_S1 = np.array([set2_trajectories[i][:,1] for i in range(num_trajectories)]).T
+    set2_S2 = np.array([set2_trajectories[i][:,2] for i in range(num_trajectories)]).T
 
     
     #plot individual trajectories
