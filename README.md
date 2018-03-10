@@ -11,7 +11,14 @@ GillesPy is part of the StochSS project, see http://www.stochss.org for more det
 
 ## Dependencies
 
-GillesPy requires numpy, scipy, and matplotlib for proper functionality. Installation details for these packages can be found at http://scipy.org. 
+GillesPy requires several packages for proper functionality, all of which are part of the scientific python stack.
+
+| Package | Version | Installation instructions |
+|---------|---------|---------------------------|
+|`numpy`|>1.6.0|http://scipy.org |
+|`scipy`|>0.13.0|http://scipy.org |
+|`matplotlib`|>1.3.0|http://scipy.org |
+|`future`|>0.16.0|http://python-future.org/quickstart.html |
 
 GillesPy does not install the StochKit or StochKitODE solvers, but requires them for stochastic or deterministic simulation, respectively. Either StochKit  **OR** StochSS must be installed to provide these solvers.
 
