@@ -400,7 +400,7 @@ class Model(object):
                             stochkit_home=stochkit_home, debug=debug,
                             show_labels=show_labels)
             else:
-                raise SimuliationError(
+                raise SimulationError(
                         "argument 'solver' to run() must be"+
                                     " a subclass of GillesPySolver")
         else:
