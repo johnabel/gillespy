@@ -1125,7 +1125,7 @@ class GillesPySolver():
         if isinstance(model, Model):
             outfile =  os.path.join(prefix_basedir, 
                                         "temp_input_"+job_id+".xml")
-            mfhandle = open(outfile, 'wb')
+            mfhandle = open(outfile, 'w')
             #document = StochMLDocument.from_model(model)
 
         # If the model is a Model instance, we serialize it to XML,
