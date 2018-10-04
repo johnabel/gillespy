@@ -12,7 +12,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import tempfile
 import uuid
-import subprocess
+import subprocess32 as subprocess
 import types
 import random
 
@@ -239,14 +239,14 @@ class Model(object):
     def delete_all_reactions(self):
         self.listOfReactions.clear()
 
-    def run(self, number_of_trajectories=1, seed=None, report_level=0, solver=None, stochkit_home=None, debug=False):
+    def run(self, number_of_trajectories=1, seed=None, report_level=0, solver=None, stochkit_home=None, debug=False,timeout=None):
         if solver is not None:
             if isinstance(solver, (type, types.ClassType)) and  issubclass(solver, GillesPySolver):
-                return solver.run(self,t=self.tspan[-1],increment=self.tspan[-1]-self.tspan[-2],seed=seed,number_of_trajectories=number_of_trajectories, stochkit_home=stochkit_home, debug=debug)
+                return solver.run(self,t=self.tspan[-1],increment=self.tspan[-1]-self.tspan[-2],seed=seed,number_of_trajectories=number_of_trajectories, stochkit_home=stochkit_home, debug=debug,timeout=None)
             else:
                 raise SimuliationError('argument "solver" to run() must be a subclass of GillesPySolver')
         else:
-            return StochKitSolver.run(self,t=self.tspan[-1],increment=self.tspan[-1]-self.tspan[-2],seed=seed,number_of_trajectories=number_of_trajectories, stochkit_home=stochkit_home, debug=debug)
+            return StochKitSolver.run(self,t=self.tspan[-1],increment=self.tspan[-1]-self.tspan[-2],seed=seed,number_of_trajectories=number_of_trajectories, stochkit_home=stochkit_home, debug=debug,timeout=None)
 
 
 class Species():
@@ -825,7 +825,7 @@ class GillesPySolver():
 
     def run(self, model, t=20, number_of_trajectories=1,
             increment=0.05, seed=None, stochkit_home=None, algorithm=None,
-            job_id=None, extra_args='', debug=False):
+            job_id=None, extra_args='', debug=False,timeout=None):
         """ 
         Call out and run the solver. Collect the results.
         """
@@ -918,7 +918,14 @@ class GillesPySolver():
         try:
             #print "CMD: {0}".format(cmd)
             handle = subprocess.Popen(cmd, stdout = subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
-            return_code = handle.wait()
+            #return_code = handle.wait()
+            try:
+                outs, errs = handle.communicate(timeout=timeout)
+            except TimeoutExpired:
+                handle.kill()
+                outs, errs = handle.communicate()
+                raise SolverTimeoutError("Solver timed out")
+
         except OSError as e:
             raise SimuliationError("Solver execution failed: \
             {0}\n{1}".format(cmd, e))
@@ -966,7 +973,7 @@ class StochKitSolver(GillesPySolver):
     @classmethod
     def run(cls, model, t=20, number_of_trajectories=1,
             increment=0.05, seed=None, stochkit_home=None, algorithm='ssa',
-            job_id=None, method=None,debug=False):
+            job_id=None, method=None,debug=False,timeout=None):
     
         # all this is specific to StochKit
         if model.units == "concentration":
@@ -998,7 +1005,7 @@ class StochKitSolver(GillesPySolver):
 
         
         self = StochKitSolver()
-        return GillesPySolver.run(self, model,t, number_of_trajectories, increment, seed, stochkit_home, algorithm, job_id, extra_args=args, debug=debug)
+        return GillesPySolver.run(self, model,t, number_of_trajectories, increment, seed, stochkit_home, algorithm, job_id, extra_args=args, debug=debug,timeout=timeout)
 
     def get_trajectories(self, outdir, debug=False):
         # Collect all the output data
@@ -1051,6 +1058,9 @@ class InvalidStochMLError(Exception):
     pass
 
 class InvalidModelError(Exception):
+    pass
+
+class SolverTimeoutError(Exception):
     pass
 
 class SimulationError(Exception):
