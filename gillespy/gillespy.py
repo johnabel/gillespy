@@ -242,11 +242,11 @@ class Model(object):
     def run(self, number_of_trajectories=1, seed=None, report_level=0, solver=None, stochkit_home=None, debug=False,timeout=None):
         if solver is not None:
             if isinstance(solver, (type, types.ClassType)) and  issubclass(solver, GillesPySolver):
-                return solver.run(self,t=self.tspan[-1],increment=self.tspan[-1]-self.tspan[-2],seed=seed,number_of_trajectories=number_of_trajectories, stochkit_home=stochkit_home, debug=debug,timeout=None)
+                return solver.run(self,t=self.tspan[-1],increment=self.tspan[-1]-self.tspan[-2],seed=seed,number_of_trajectories=number_of_trajectories, stochkit_home=stochkit_home, debug=debug,timeout=timeout)
             else:
                 raise SimuliationError('argument "solver" to run() must be a subclass of GillesPySolver')
         else:
-            return StochKitSolver.run(self,t=self.tspan[-1],increment=self.tspan[-1]-self.tspan[-2],seed=seed,number_of_trajectories=number_of_trajectories, stochkit_home=stochkit_home, debug=debug,timeout=None)
+            return StochKitSolver.run(self,t=self.tspan[-1],increment=self.tspan[-1]-self.tspan[-2],seed=seed,number_of_trajectories=number_of_trajectories, stochkit_home=stochkit_home, debug=debug,timeout=timeout)
 
 
 class Species():
@@ -925,7 +925,7 @@ class GillesPySolver():
             return_code = 0
         except subprocess.TimeoutExpired:
             handle.kill()
-            outs, errs = handle.communicate()
+            outs, errs = handle.communicate(timeout=timeout)
             return_code=-1
             raise SolverTimeoutError("Solver timed out")
 
