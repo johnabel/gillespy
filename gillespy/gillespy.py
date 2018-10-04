@@ -918,10 +918,10 @@ class GillesPySolver():
         #try:
             #print "CMD: {0}".format(cmd)
             #handle = subprocess.Popen(cmd, stdout = subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
-        handle = subprocess.Popen(cmd)
+        handle = subprocess.Popen(cmd,shell=True)
             #return_code = handle.wait()
         try:
-            outs, errs = handle.communicate(timeout=timeout,shell=True)
+            outs, errs = handle.communicate(timeout=timeout)
             return_code = 0
         except subprocess.TimeoutExpired:
             handle.kill()
