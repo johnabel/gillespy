@@ -921,7 +921,7 @@ class GillesPySolver():
         handle = subprocess.Popen(cmd)
             #return_code = handle.wait()
         try:
-            outs, errs = handle.communicate(timeout=timeout)
+            outs, errs = handle.communicate(timeout=timeout,shell=True)
             return_code = 0
         except subprocess.TimeoutExpired:
             handle.kill()
