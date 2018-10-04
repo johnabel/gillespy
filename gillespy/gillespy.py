@@ -921,9 +921,11 @@ class GillesPySolver():
             #return_code = handle.wait()
             try:
                 outs, errs = handle.communicate(timeout=timeout)
+                return_code = 0
             except subprocess.TimeoutExpired:
                 handle.kill()
                 outs, errs = handle.communicate()
+                return_code=-1
                 raise SolverTimeoutError("Solver timed out")
 
         except OSError as e:
