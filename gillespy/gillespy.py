@@ -915,31 +915,32 @@ class GillesPySolver():
             print "cmd: {0}".format(cmd)
 
         # Execute
-        try:
+        #try:
             #print "CMD: {0}".format(cmd)
-            handle = subprocess.Popen(cmd, stdout = subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
+            #handle = subprocess.Popen(cmd, stdout = subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
+        handle = subprocess.Popen(cmd)
             #return_code = handle.wait()
-            try:
-                outs, errs = handle.communicate(timeout=timeout)
-                return_code = 0
-            except subprocess.TimeoutExpired:
-                handle.kill()
-                outs, errs = handle.communicate()
-                return_code=-1
-                raise SolverTimeoutError("Solver timed out")
+        try:
+            outs, errs = handle.communicate(timeout=timeout)
+            return_code = 0
+        except subprocess.TimeoutExpired:
+            handle.kill()
+            outs, errs = handle.communicate()
+            return_code=-1
+            raise SolverTimeoutError("Solver timed out")
 
-        except OSError as e:
-            raise SimuliationError("Solver execution failed: \
-            {0}\n{1}".format(cmd, e))
+        #except OSError as e:
+        #    raise SimuliationError("Solver execution failed: \
+        #    {0}\n{1}".format(cmd, e))
         
-        try:
-            stderr = handle.stderr.read()
-        except Exception as e:
-            stderr = 'Error reading stderr: {0}'.format(e)
-        try:
-            stdout = handle.stdout.read()
-        except Exception as e:
-            stdout = 'Error reading stdout: {0}'.format(e)
+        #try:
+        #    stderr = handle.stderr.read()
+        #except Exception as e:
+        #    stderr = 'Error reading stderr: {0}'.format(e)
+        #try:
+        #    stdout = handle.stdout.read()
+        #except Exception as e:
+        #    stdout = 'Error reading stdout: {0}'.format(e)
 
         if return_code != 0:
             #print stdout
