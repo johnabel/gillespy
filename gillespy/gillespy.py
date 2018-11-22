@@ -15,6 +15,9 @@ import uuid
 import subprocess32 as subprocess
 import types
 import random
+import os
+import signal
+import psutil
 
 try:
     import lxml.etree as etree
@@ -878,6 +881,7 @@ class GillesPySolver():
                                            algorithm)):
                 executable = os.path.join(os.environ.get('STOCHKIT_HOME'), 
                                           algorithm)
+
         if executable is None:
             # try to find the executable in the path
             if os.environ.get('PATH') is not None:
@@ -918,12 +922,17 @@ class GillesPySolver():
         #try:
             #print "CMD: {0}".format(cmd)
             #handle = subprocess.Popen(cmd, stdout = subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
-        handle = subprocess.Popen(cmd,shell=True)
+        handle = subprocess.Popen(cmd,shell=True, preexec_fn=os.setsid)
             #return_code = handle.wait()
         try:
             outs, errs = handle.communicate(timeout=timeout)
             return_code = 0
         except subprocess.TimeoutExpired:
+	    #os.killpg(os.getpgid(handle.pid),signal.SIGTERM)
+            #print os.getpgid(handle.pid)
+	    parent = psutil.Process(handle.pid)
+	    for child in parent.children(recursive=True):  # or parent.children() for recursive=False
+                child.kill()	    
             handle.kill()
             outs, errs = handle.communicate(timeout=timeout)
             return_code=-1
