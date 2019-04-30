@@ -1,3 +1,5 @@
+# setup for 2.7
+
 from setuptools import setup
 from setuptools.command.develop import develop
 from setuptools.command.install import install
