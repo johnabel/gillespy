@@ -6,9 +6,8 @@ This serves primarily as a python wrapper for the C-based solvers within
 StochKit2. The gillespy.Model class provides nearly all of the functionality
 present in this project.
 
-This version is updated (4/2017) to contain documentation in a more reasonable 
-format. This does not necessarily mean it is perfect, but it is certainly an
-improvement over the original.
+This version is updated (4/2019) for python3.7. This does not necessarily 
+mean it is perfect, but it is certainly an improvement over the original.
     
 """
 from __future__ import division
@@ -136,7 +135,7 @@ class Model(object):
         """ Serializes the Model object to valid StochML. """
         self.resolve_parameters()
         doc = StochMLDocument().from_model(self)
-        return doc.to_string()
+        return doc.to_string().decode('utf-8')
     
     def update_namespace(self):
         """ Create a dict with flattened parameter and species objects. """
