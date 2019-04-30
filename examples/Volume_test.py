@@ -66,7 +66,7 @@ if __name__ == '__main__':
     num_trajectories = 1
     simple_1trajectories = gillespy.StochKitSolver.run(simple_1, 
             number_of_trajectories = num_trajectories, show_labels=False)
-    print time.time() - tick
+    print(time.time() - tick)
     # PLOTTING
 
     # here, we will plot all trajectories with the mean overlaid

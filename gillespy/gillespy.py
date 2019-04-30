@@ -257,10 +257,10 @@ class Model(object):
             for p in params:
                 self.listOfParameters[p.name] = p
         else:
-            if type(params).__name__=='instance':
+            if type(params).__name__=='Parameter':
                 self.listOfParameters[params.name] = params
             else:
-                raise
+                raise Warning("Invalid params argument.")
         return params
 
     def delete_parameter(self, obj):
@@ -307,15 +307,15 @@ class Model(object):
         """ Deletes all parameters from model. """
         self.listOfParameters.clear()
 
-    def add_reaction(self,reacs):
+    def add_reaction(self, reacs):
         """ 
-        Adds a reaction, or list of reactions to the model.
+        Adds a reaction, or list of reactions to the model. 
         
         Attributes
         ----------
         obj : Reaction, or list of Reactions
-            The reaction or list of reaction objects to be added to the model
-            object.
+            The reaction or list or dict of reaction objects to be added 
+            to the model object.
         """
         
         # TODO, make sure that you cannot overwrite an existing reaction
@@ -324,11 +324,12 @@ class Model(object):
             for r in reacs:
                 self.listOfReactions[r.name] = r
         elif param_type == 'dict' or param_type == 'OrderedDict':
-            self.listOfReactions = reacs
-        elif param_type == 'instance':
+            for rkey in reacs.keys():
+                self.listOfReactions[rkey] = reacs[rkey]
+        elif param_type == 'Reaction':
                 self.listOfReactions[reacs.name] = reacs
         else:
-            raise
+            raise Warning("Reaction not added, invalid param_type.")
         return reacs
 
     def timespan(self, tspan):
@@ -621,10 +622,10 @@ class Reaction():
             # Case 1: 2X -> Y
             if self.reactants[r] == 2:
                 propensity_function = ("0.5*" +propensity_function+ 
-                                            "*"+r+"*("+r+"-1)/vol")
+                                            "*"+r.name+"*("+r.name+"-1)/vol")
             else:
             # Case 3: X1, X2 -> Y;
-                propensity_function += "*"+r
+                propensity_function += "*"+r.name
 
         # Set the volume dependency based on order.
         order = len(self.reactants)
@@ -813,7 +814,7 @@ class StochMLDocument():
         if model.name is "":
             name = root.find('Name')
             if name.text is None:
-                raise
+                raise Warning("No name found.")
             else:
                 model.name = name.text
         
@@ -908,7 +909,7 @@ class StochMLDocument():
                         # The sref list should only contain one element if 
                         # the XML file is valid.
                         reaction.reactants[specname] = stoch
-                    except Exception,e:
+                    except Exception as e:
                         StochMLImportError(e)
             except:
                 # Yes, this is correct. 'reactants' can be None
@@ -924,7 +925,7 @@ class StochMLDocument():
                         # The sref list should only contain one element if 
                         # the XML file is valid.
                         reaction.products[specname] = stoch
-                    except Exception,e:
+                    except Exception as e:
                         raise StochMLImportError(e)
             except:
                 # Yes, this is correct. 'products' can be None
@@ -941,7 +942,7 @@ class StochMLDocument():
                     ratename=reac.find('Rate').text
                     try:
                         reaction.marate = model.listOfParameters[ratename]
-                    except KeyError, k:
+                    except KeyError as k:
                         # No paramter name is given. This is a valid use case 
                         # in StochKit. We generate a name for the paramter, 
                         # and create a new parameter instance. The parameter's 
@@ -957,12 +958,12 @@ class StochMLDocument():
                                                 generated_rate_name]
 
                     reaction.create_mass_action()
-                except Exception, e:
-                    raise
+                except Exception as e:
+                    raise InvalidModelError(e)
             elif type == 'customized':
                 try:
                     propfunc = reac.find('PropensityFunction').text
-                except Exception,e:
+                except Exception as e:
                     raise InvalidStochMLError("Found a customized " +
                     "propensity function, but no expression was given."+e)
                 reaction.propensity_function = propfunc
@@ -1049,7 +1050,7 @@ class StochMLDocument():
 
         for reactant, stoichiometry in R.reactants.items():
             srElement = etree.Element('SpeciesReference')
-            srElement.set('id', reactant)
+            srElement.set('id', reactant.name)
             srElement.set('stoichiometry', str(stoichiometry))
             reactants.append(srElement)
 
@@ -1058,7 +1059,7 @@ class StochMLDocument():
         products = etree.Element('Products')
         for product, stoichiometry in R.products.items():
             srElement = etree.Element('SpeciesReference')
-            srElement.set('id', product)
+            srElement.set('id', product.name)
             srElement.set('stoichiometry', str(stoichiometry))
             products.append(srElement)
         e.append(products)
@@ -1186,7 +1187,7 @@ class GillesPySolver():
         num_output_points = str(int(float(t/increment)))
         args += ' -i ' + num_output_points
         if ensemblename in directories:
-            print 'Ensemble '+ensemblename+' already existed, using --force.'
+            print('Ensemble '+ensemblename+' already existed, using --force.')
             args+=' --force'
         
 
@@ -1194,7 +1195,7 @@ class GillesPySolver():
         # (SSA or Tau-leaping or ODE)
         cmd = executable+' '+args+' '+extra_args
         if debug:
-            print "cmd: {0}".format(cmd)
+            print("cmd: {0}".format(cmd))
 
         # Execute
         try:
@@ -1249,9 +1250,9 @@ class GillesPySolver():
 
         # Clean up
         if debug:
-            print "prefix_basedir={0}".format(prefix_basedir)
-            print "STDOUT: {0}".format(stdout)
-            print "STDERR: {0}".format(stderr)
+            print("prefix_basedir={0}".format(prefix_basedir))
+            print("STDOUT: {0}".format(stdout))
+            print("STDERR: {0}".format(stderr))
         else:
             shutil.rmtree(prefix_basedir)
         # Return data
@@ -1413,7 +1414,7 @@ class StochKitODESolver(GillesPySolver):
 
     def get_trajectories(self, outdir, debug=False, show_labels=False):
         if debug:
-            print "StochKitODESolver.get_trajectories(outdir={0}".format(outdir)
+            print("StochKitODESolver.get_trajectories(outdir={0}".format(outdir))
         # Collect all the output data
         trajectories = []
         with open(outdir + '/output.txt') as fd:
